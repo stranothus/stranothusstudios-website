@@ -312,6 +312,10 @@ apiRouter.route("/portfolio")
 		let body = req.body;
 
 		if(req.loggedIn && req.files && body.title && body.link && body.about && body.why && body.how && !body.index) {
+			if(req.token.perms !== "Admin") {
+				res.send("You ain't admin");
+				return;
+			}
 			let index = (await readDB("Content", "Portfolio", {})).length;
 			client.db("Content").collection("Portfolio").insertOne({
 				"image" : req.files[0].path.replace(/^([a-zA-Z\/\-]+?)\/public/, ""),
@@ -327,6 +331,10 @@ apiRouter.route("/portfolio")
 				res.redirect("/page/project/" + index);
 			});
 		} else if(req.loggedIn && body.index + 1) {
+			if(req.token.perms !== "Admin") {
+				res.send("You ain't admin");
+				return;
+			}
 			client.db("Content").collection("Portfolio").updateOne({ "index": body.index }, {
 				...(req.files.length? { "image" : req.files[0].path.replace(/^([a-zA-Z\/\-]+?)\/public/, "") } : {}),
 				...(body.title ? { "title" : body.title } : {}),
@@ -350,6 +358,10 @@ apiRouter.route("/portfolio")
 		let body = req.body;
 
 		if(req.loggedIn && body.index + 1) {
+			if(req.token.perms !== "Admin") {
+				res.send("You ain't admin");
+				return;
+			}
 			client.db("Content").collection("Portfolio").deleteOne({ "index": body.index }, (err, result) => {
 				if(err) console.error(err);
 
