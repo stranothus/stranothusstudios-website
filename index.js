@@ -4,6 +4,9 @@ const multer = require("multer");
 const cookieParser = require("cookie-parser");
 const { MongoClient } = require("mongodb");
 const nodemailer = require("nodemailer");
+const dotenv = require("dotenv");
+
+dotenv.config();
 
 const storage = multer.diskStorage({
     destination : function (req, file, cb) {
@@ -38,12 +41,27 @@ const transporter = nodemailer.createTransport({
 	}
 });
 
+const client = new Promise((resolve, reject) => {
+	MongoClient.connect("mongodb+srv://stranothus:<password>@cluster0.yp9al.mongodb.net/myFirstDatabase?retryWrites=true&w=majority",
+		{
+			useNewUrlParser: true,
+			useUnifiedTopology: true
+		},
+		(err, client) => {
+			if(err) console.err(err);
+
+			resolve(client);
+		}
+	);
+}).then(client => { return client; });
+
+
 /**
- * Sends mail
+ * Sends mail using the specified mailOptions
  * 
- * @param mailOptions {from : string, to : string, subject : string, text : string, html : string}
+ * @param {{from : string, to : string, subject : string, text : string, html : string}} mailOptions - set of options to specify what to mail who
  * 
- * @returns Promise<object>
+ * @returns {Promise<object>} Info - informations on the sent mail
  */
 const sendEmail = mailOptions => {
 	return new Promise((resolve, reject) => transporter.sendMail(mailOptions, (err, info) => {
@@ -53,6 +71,15 @@ const sendEmail = mailOptions => {
 	}));
 };
 
+/**
+ * Logs an event to logs.txt
+ * 
+ * @param {string} type - the type of event to log
+ * 
+ * @param {string} log - the log contents
+ * 
+ * @returns {void} void
+ */
 const log = (type, log) => {
 	fs.readFile(__dirname + `/logs.txt`, "utf-8", (err, content) => {
 		if(err) {
@@ -63,8 +90,23 @@ const log = (type, log) => {
 
 		fs.writeFile(__dirname + `/logs.txt`, content, () => {});
 	});
-} 
+};
 
+/**
+ * Creates the HTML code for a portfolio project
+ * 
+ * @param {string} title - the title of the project
+ * 
+ * @param {string} image - link to the project image
+ * 
+ * @param {string} about - about the project
+ * 
+ * @param {string} how - how the project was developed
+ * 
+ * @param {string} why - why the project was developed
+ * 
+ * @returns {void} void
+ */
 const projectHTML = (title, image, about, how, why) => {
 	return (`
 		<!DOCTYPE html>
@@ -99,14 +141,14 @@ const projectHTML = (title, image, about, how, why) => {
 			</body>
 		</html>
 	`);
-}
+};
 
 
 var pageRouter = express.Router();
-	app.use("/page", pageRouter);
+	app.use("/page", pageRouter); // create the page router
 
 var apiRouter = express.Router();
-	app.use("/api", apiRouter);
+	app.use("/api", apiRouter); // create the api router
 
 
 app.get("/", (req, res) => {
@@ -152,16 +194,14 @@ apiRouter.post("/contact", (req, res) => {
 	var body = req.body;
 
 	if(body.name && body.email && body.purpose && body.additional) {
-		/*sendEmail({
+		sendEmail({
 		    service : "gmail",
 			user : "stranothusbot@gmail.com",
-			password : process.env["emailPassword"],
+			password : process.env["EMAIL_PASS"],
 			to : "stranothus@gmail.com",
 			subject : "Stranothus Studios Contact",
 			content : `${body.name} has contacted you to discuss a website to ${body.purpose}. Additional information: ${body.additional}\n\nContact them at ${body.email}`
-		});*/
-		
-		log("POST", `${body.name} has contacted you to discuss a website to ${body.purpose}. Additional information: ${body.additional}\n\nContact them at ${body.email}`);
+		});
 		res.status(200).redirect("/page/contact");
 	} else {
 		log("FAIL", "Malformed contact email sent");
