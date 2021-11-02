@@ -1,0 +1,54 @@
+[
+    {
+        "title": "JavaScript",
+        "date": "2021-08-15T14:09:57.898Z",
+        "content": "JavaScript is *the* web scripting language. It's a dynamically typed  language interpreted on runtime with no need for compilation or data types. It's multitude of API's allow for interaction with HTML and CSS to create powerful websites, and it can be used for other purposes too. \n\nTaking JavaScript even further are frameworks like React, Angular, and Vue. JavaScript even has backend version like Node and transpile tos like CoffeeScript and TypeScript. \n\n## Pros:\n- Dynamically typed\n- Multitude of APIs\n- No compilation\n- Popular\n\n## Cons:\n- Poor error management\n- No alternatives for web design",
+        "topics": [
+            "Language Review"
+        ]
+    },
+    {
+        "title": "Hashing",
+        "date": "2021-08-23T14:26:31.349Z",
+        "content": "Recently, I've been learning more about hashing. In backend development, you'll often have accounts which users create and then use. Accounts necessitate an extra layer of security. What could go wrong?\n\nFirst off, the account could be compromised. If you store passwords in a public database, they could easily be swiped. Alternatively, you can keep passwords as environment variables, also known as secrets, in their raw form, but that's not exactly ideal either. There are also additional complications. Many internet users have just a few passwords and reuse them constantly. If a malicious hacker finds one instance of a password, they could potentially access more dangerous information such as bank accounts, personal emails, etc. So, what's the solution?\n\nthe answer is to never store the password in the first place. Instead, you store a hash. For Node JS, a popular package to use is bcrypt. A hash is a string of unintelligible characters to represent an encoded value. The reason hashes are so secure is because they can't be reversed. Hashes usually involve some sort of connection to the user's account, and a connection to a token secret stored in environment variables. The only way to check the hash is to rehash with the same values. Since one value is a server secret, other applications can't access it, and since the other value is user input, a third user wouldn't know it. \n\nAfter you've finished creating a hash for a user's account, you can store that hash with all the other user information in the database, because it can't be reversed. It's completely safe from any malicious hackers, unless you reveal the token secret or a user reveals their password. ",
+        "topics": [
+            "Security",
+            "Learning"
+        ]
+    },
+    {
+        "title": "First Hackathon",
+        "date": "2021-09-11T14:25:23.168Z",
+        "content": "Recently, I got the opportunity to participate in my first hackathon, the WaffleHacks Hackathon!\n\nA hackathon is an event where programmers come together, typically in teams, to create projects fitting a central theme in a timed session. They're really fun, but also exhausting. I ended up working twelve hours one day, and one of my teammates worked *seventeen*!\n\nWe created Ease Commerce, a modern day ECommerce solution. You can check it out in my portfolio, along with greater detail on the [/page/project/0](project itself).\n\nIt was a really great experience, overall. I hope to participate in more in the future. ",
+        "topics": [
+            "Hackathon",
+            "Learning"
+        ]
+    },
+    {
+        "title": "TypeScript",
+        "date": "2021-09-22T18:53:52.646Z",
+        "content": "I know JavaScript, but what's this TypeScript? Is it JavaScript? Is it a JavaScript library? Does it even work the same way?\n\nTypeScript is a transpile to language. That means, it actually doesn't run the program written in it. Instead, the code is turned into JavaScript which can be run. So what is the point even? Well, during the conversion, the transpiler can find a lot of potential errors and point those out. How does it do that? Let's take a look.\n\nJavaScript is a dynamically typed language. You can create an variable with a simple `var foo = value;` which is great! New learners don't need to concern themselves with tricky data types like in some languages. The problem is, for more, complicated projects, dynamic typing can be really bad. It makes it harder to check for errors. What if you assign the wrong data type of value to variable? Perhaps you use a string `\"false\"` instead of a boolean `false`. JavaScript doesn't see a problem until your `if` statement evaluates to `true` because of the truthy nature of nonempty strings in JS. This is where TypeScript comes into play.\n\nTypeScript's transpiler checks the program as it's being converted to JS. Specifically, it checks for misassigned data types to variables, just like a strictly typed language. It literally catches these mistakes before your program is ever run. This means fewer errors and better programming practices.\n\nIn addition to catching errors, TypeScript is also sometimes preferred as more human readable than JavaScript. The accompanying assignment of data types means fewer comments are necessary. Many programmers forego comments altogether in normal coding, so being able to tell what a program does based off just the code is a huge advantage. It's also a lot easier for programmers more familiar to strictly typed languages to read. \n\n## Pros:\n- Strictly typed\n- Dynamic typing available with data type `any`\n- More human readable\n- Encourages more standard practices\n\n## Cons:\n- Takes longer to type\n- Extra step of transpilation",
+        "topics": [
+            "Language Review",
+            "Transpilers"
+        ]
+    },
+    {
+        "title": "Second Hackathon",
+        "date": "2021-10-13T12:11:49.064Z",
+        "content": "[View my first hackathon too!](#post-2)\n\nI just finished participation in my second hackathon, FutureFest2021! FutureFest was focused on fundamental issues such as equality, environment, education, and health. I got to work with Leaf and Totoro, two friends from a while back.\n\nWe created a self healthcare assistant website called Live Well and Breathe. I'll be adding it to my portfolio soon. \n\nWhile last time I worked frontend, this time, I worked mostly backend. It was really fun to use Node, Express, and Mongo to develop the server side of the site, and I also got to work frontend a little. \n\nWe spent about two weeks developing our site and were able to submit it several hours before the deadline. It was definitely a lot calmer than my first rushed hackathon was!\n\nWe don't have any plans, as of now, but I hope we can continue site development in the future. I have some really cool ideas to add to what we already have as well as expanding the current features!",
+        "topics": [
+            "Hackathon",
+            "Learning"
+        ]
+    },
+    {
+        "title": "CSS",
+        "date": "2021-10-27T13:24:38.327Z",
+        "content": "CSS, Cascading Style Sheets, is the styling language of the web. It's paired with HTML to create stunning websites. \n\nSyntax is very basic. An element or group of elements is selected, and modifiers are placed within curly brackets directly following the selector. Modifiers have two parts. First, a property is selected to be modified. Then, the property is assigned a value.\n```CSS\nselector {\n    property: value;\n}\n```\n## Pros:\n- Simple\n- Readable\n- Powerful\n\n## Cons:\n- Limited logic\n- Not compact\n- Hard to organize within a file",
+        "topics": [
+            "Language Review"
+        ]
+    }
+]

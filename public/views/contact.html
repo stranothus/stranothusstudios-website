@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset = "utf-8">
+		<meta name = "viewport" content = "width=device-width">
+		<title>Contact</title>
+		<link href = "/styles/nav.css" rel = "stylesheet" type = "text/css" />
+		<link href = "/styles/content.css" rel = "stylesheet" type = "text/css" />
+		<link href = "/styles/footer.css" rel = "stylesheet" type = "text/css" />
+		<link href = "/styles/general.css" rel = "stylesheet" type = "text/css" />
+		<link href = "/styles/form.css" rel = "stylesheet" type = "text/css" />
+	</head>
+	<body>
+		<nav id = "nav"></nav>
+		<section id = "content">
+			<div class = "text-section">
+				<p>Interested in contacting me for a web development project? Here are some things you might want to know first:</p>
+				<ul>
+					<li>Rates: I'd lik to charge hourly rates, assuming that's okay with you. Average web developer rates are typically 75 USD per hour, but, seeing as I am new to the business and not as experienced as other options, I'm willing to charge significantly less. We can discuss more in detail what makes sense for your project.</li>
+					<li>Time: Web development needs to take second place in my life to school until I graduate. I won't be able to complete websites as quickly as I wish I could, so I might not be a great option if you need the finished product right away.</li>
+					<li>Fullstack: Simple webpages might only need static elements. Maybe you don't plan on consistently adding content like a blog or having others add comments like a forum, but, if you do plan on it, I have you covered. Things like blogs, user accounts, forums, et cetera are all possible with backend. As a fullstack web developer, I can meet your needs on both ends. </li>
+					<li>Specialty: I specialize in websites for small businesses and organizations or personal websites for hobbies like writing or blogging. I wouldn't be the best choice if you need something for a larger business.</li>
+				</ul>
+				<p>If you're still interested, that's great! Assuming I don't have much of a list of waiting clients, you can contact me below to start discussing what would be reasonable for a contract and then I can start on your webpage!</p>
+				<p>Fill out the form below and send it. I'll get an email with the filled out information and get back to you as soon as possible.</p>
+				<form action = "/api/contact" method = "POST" enctype = "multipart/form-data">
+					<input name = "name" type = "text" placeholder = "Your name..." required>
+					<input name = "email" type = "email" placeholder = "you@email.com" required>
+					<input name = "purpose" type = "text" placeholder = "purpose of website" required>
+					<textarea name = "additional" placeholder = "additional information" required></textarea>
+					<button type = "submit">Send</button>
+				</form>
+			</div>
+		</section>
+		<footer id = "footer"></footer>
+		<script type = "module" src = "/scripts/footer.js"></script>
+		<script type = "module" src = "/scripts/nav.js"></script>
+	</body>
+</html>

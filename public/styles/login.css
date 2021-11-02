@@ -1,0 +1,16 @@
+h2 {
+	width : 30vw;
+	padding : 10px 0;
+	margin : 10px 0 50px;
+	font-family : var(--font-accent);
+	font-size : 1.8rem;
+	color : var(--txt-accent);
+	text-align : center;
+	border-bottom : 3px solid var(--txt-accent);
+}
+
+
+form {
+	margin : 50px 20vw;
+	width : 40vw;
+}

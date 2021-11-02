@@ -1,0 +1,107 @@
+form {
+	display : flex;
+	flex-direction : column;
+	align-items : center;
+	justify-content : center;
+	width : 80%;
+	height : auto;
+	margin : 50px 0;
+	padding : 25px 10%;
+	border-radius : 5px;
+	border : 3px solid var(--bg-tint-1);
+	background-color : var(--bg-tint-2);
+}
+form input:not([type=file]) {
+	width : 40vw;
+	height : 0;
+	margin : 10px 0;
+	padding : 25px 10px;
+	font-family : var(--font-accent);
+	font-size : 1.1rem;
+	line-height : 0;
+	color : var(--txt-main);
+	border-radius : 0;
+	border : none;
+	border-bottom : 2px solid var(--bg-main);
+	background-color : transparent;
+}
+form input:not([type=file]):active,
+form input:not([type=file]):focus {
+	outline : none;
+	border-bottom : 2px solid var(--bg-accent-1);
+}
+form input::placeholder {
+	color : var(--txt-main);
+	filter : brightness(50%);
+}
+form textarea {
+	width : 40vw;
+	margin : 25px 0;
+	padding : 25px 10px;
+	font-family : var(--font-accent);
+	font-size : 1.1rem;
+	color : var(--txt-main);
+	border-radius : 0;
+	border : none;
+	border-bottom : 2px solid var(--bg-main);
+	background-color : transparent;
+	resize : vertical;
+}
+form textarea:active,
+form textarea:focus {
+	outline : none;
+	border-bottom : 2px solid var(--bg-accent-1);
+}
+form textarea::placeholder {
+	color : var(--txt-main);
+	filter : brightness(50%);
+}
+form button {
+	width : 15vw;
+	height : 0;
+	margin : 50px 0 25px;
+	padding : 20px 5px;
+	font-family : var(--font-accent);
+	font-size : 1rem;
+	line-height : 0;
+	text-align : center;
+	color : var(--txt-main);
+	text-decoration : none;
+	border : none;
+	border-radius : 3px;
+	background-color : var(--bg-tint-1);
+	box-shadow : 0 0 0vw inset #00000020, 0 0 0 0 #000000A0;
+	cursor : pointer;
+	transition : 0.2s all;
+}
+form button:hover {
+	box-shadow : 0 0 7.5vw inset #00000030, 0 1px 3px 0 #000000A0;
+	transition : 0.2s all;
+}
+form select {
+	appearance : none;
+	display : flex-box;
+	align-items : center;
+	width : calc(40vw + 20px);
+	height : 50px;
+	margin : 10px 0;
+	padding : 0 10px;
+	font-family : var(--font-accent);
+	font-size : 1.1rem;
+	color : var(--txt-main);
+	background-color : transparent;
+	border : 2px solid var(--bg-main);
+	border-radius : 5px;
+	outline : none;
+	cursor : pointer;
+}
+form select:active,
+form select:focus {
+	border : 2px solid var(--bg-accent-1);
+}
+form select option {
+	font-family : var(--font-accent);
+	font-size : 1.1rem;
+	line-height : 0;
+	color : var(--txt-main);
+}

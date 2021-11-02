@@ -1,0 +1,35 @@
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Roboto:wght@500&family=Source+Sans+Pro&display=swap');
+
+
+:root {
+	--bg-main : #303030;
+	--bg-tint-1 : #202020;
+	--bg-tint-2 : #404040;
+	--bg-accent-1 : #FAC000;
+	--bg-accent-2 : #FA00C0;
+	--txt-main : #EFEFEF;
+	--txt-accent : #FAC000;
+	--font-title : 'Roboto', sans-serif;
+	--font-accent : 'Source Sans Pro', sans-serif;
+	--font-main : 'Lato', sans-serif;
+}
+
+
+* {
+	margin : 0;
+	padding : 0;
+}
+
+
+body {
+	width : 100vw;
+	height : auto;
+	overflow-x : hidden;
+	background-color : var(--bg-main);
+}
+
+
+.flex-row-break {
+	flex-basis : 100%;
+	width : 0;
+}

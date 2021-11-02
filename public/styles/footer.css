@@ -1,0 +1,78 @@
+#footer {
+	position : relative;
+	z-index : 101;
+	width : 100vw;
+	height : auto;
+	padding : 20px 0;
+	margin : -50px 0 0;
+	overflow-x : hidden;
+	background-color : var(--bg-main);
+}
+#footer #main-links {
+	display : flex;
+	flex-direction : row;
+	flex-wrap : nowrap;
+	justify-content : space-between;
+	width : 80vw;
+	height : auto;
+	padding : 10px 10vw;
+	outline : 10px solid var(--bg-tint-2);
+	outline-offset : 10px;
+	background-color : var(--bg-tint-2);
+	list-style : none;
+}
+#footer #main-links a {
+	font-family : var(--font-accent);
+	font-size : 1.1rem;
+	color : var(--txt-main);
+	text-decoration : none;
+}
+#footer #all-links {
+	display : flex;
+	flex-direction : row;
+	flex-wrap : wrap;
+	align-items : center;
+	justify-content : center;
+	width : 80vw;
+	height : auto;
+	margin : 20px 0;
+	padding : 25px 10vw;
+	outline : 10px solid var(--bg-main);
+	outline-offset : 10px;
+	background-color : var(--bg-main);
+	list-style : none;
+	text-align : center;
+}
+#footer #all-links li {
+	list-style : none;
+}
+#footer #all-links li a {
+	margin : 0 20px;
+	font-family : var(--font-accent);
+	font-size : 1rem;
+	color : var(--txt-main);
+	text-decoration : none;
+	line-height : 2;
+	text-align : center;
+}
+#footer #media-links {
+	display : flex;
+	flex-direction : row;
+	flex-wrap : nowrap;
+	justify-content : center;
+	width : 80vw;
+	height : auto;
+	margin : 0 0 -20px;
+	padding : 10px 10vw 20px;
+	outline : 10px solid var(--bg-tint-1);
+	outline-offset : 10px;
+	background-color : var(--bg-tint-1);
+	list-style : none;
+}
+#footer #media-links a {
+	margin : 0 15vw;
+	font-family : var(--font-accent);
+	font-size : 1.1rem;
+	color : var(--txt-main);
+	text-decoration : none;
+}

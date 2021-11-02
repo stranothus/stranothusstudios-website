@@ -1,0 +1,18 @@
+[
+    {
+        "image": "/home/o92fiyaxtn0p/public_html/public/uploads/F3967F5D-3031-4593-9E6B-6D1653C04D9C.png",
+        "title": "Ease Commerce",
+        "link": "https://easecommerce.repl.co/",
+        "about": "Ease Commerce is an E Commerce website built by Leviathan Programming, Manan, Gaurika, and yours truly for the WaffleHacks Hackathon of 2021. ",
+        "why": "Amazon is the largest E Commerce solution out there, but it's not for everyone. We wanted something to focus on the seller's experience first and foremost, to create a thriving company.",
+        "how": "We used NodeJS, MongoDB, HTML5, CSS3, JS, jQuery, and Figma."
+    },
+    {
+        "image": "/home/o92fiyaxtn0p/public_html/public/uploads/A8E3C5DF-F493-4CE2-8046-F8657F182EE6.png",
+        "title": "Live Well and Breathe",
+        "link": "https://live-well-and-breathe.stranothus-studios.repl.co/pages/home",
+        "about": "Live Well and Breathe is a self care assist website I created with Leaf and Totoro for the FutureFest2021 Hackathon over a two-week period. I worked primarily backend, but also got to do some good work frontend with logic and design. ",
+        "why": "We wanted to make it easier than ever before for average everyday people to enjoy better than average health without expensive subscriptions or professional help, which, in many cases, are way beyond practicality. You shouldn't need to pay someone else to tell you how to eat healthier or stay on top of crippling mental states caused by poor physical state. With Live Well, you don't have to pay or depend on someone else for everything.",
+        "how": "I used NodeJS and Express to develop the backend and API. As I was recently familiar with MongoDB, I chose to use that as our database, paired with bcrypt and jwt for account security. For frontend, Leaf used Vue, which I had limited experience with. I learned enough to work with them for the project, and am looking to continue furthering my knowledge."
+    }
+]
