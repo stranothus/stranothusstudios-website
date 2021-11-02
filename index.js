@@ -4,9 +4,13 @@ const multer = require("multer");
 const cookieParser = require("cookie-parser");
 const { MongoClient } = require("mongodb");
 const nodemailer = require("nodemailer");
+const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
 
 dotenv.config();
+
+const { genSalt, genHash, checkHash } = require("./utils/hash.js");
+const { c } = require("tar");
 
 const storage = multer.diskStorage({
     destination : function (req, file, cb) {
@@ -23,10 +27,18 @@ const cookies = cookieParser();
 const upload = multer({ storage : storage });
 const uploadArray = upload.array("file");
 const route = express.static(__dirname + "/public");
+const loggedIn = (req, res, next) => {
+	if(req.cookies.token) {
+		req.token = jwt.verify(req.cookies.token, process.env.TOKEN_SECRET);
+	}
+
+	next();
+}
 
 app.use(body);
 app.use(uploadArray);
 app.use(cookies);
+app.use(loggedIn);
 app.use(route);
 // app.use(loggedIn);
 
@@ -36,8 +48,8 @@ const gmail = "stranothusbot@gmail.com";
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth : {
-		user : gmail,
-		pass : emailPassword
+		user : process.env.EMAIL_NAME,
+		pass : process.env.EMAIL_PASS
 	}
 });
 
@@ -55,6 +67,27 @@ const client = new Promise((resolve, reject) => {
 	);
 }).then(client => { return client; });
 
+/**
+ * Reads a database and returns the results of a query asynchronously
+ * 
+ * @param {string} db - the database to search
+ * 
+ * @param {string} coll - the collection of the database to search
+ * 
+ * @param {object} query - the query to use for the search
+ * 
+ * @returns {Promise<array>} results - the documents found from the query
+ */
+async function readDB(db, coll, query) {
+	return new Promise((resolve, reject) => {
+		client.db(db).collection(coll).find(query).toArray((err, results) => {
+			if(err) console.error(err);
+
+			resolve(results);
+		});
+	}).then(results => { return results; });
+}
+
 
 /**
  * Sends mail using the specified mailOptions
@@ -63,7 +96,7 @@ const client = new Promise((resolve, reject) => {
  * 
  * @returns {Promise<object>} Info - informations on the sent mail
  */
-const sendEmail = mailOptions => {
+const sendEmail = async mailOptions => {
 	return new Promise((resolve, reject) => transporter.sendMail(mailOptions, (err, info) => {
 		if (err) console.error(err);
 
@@ -190,14 +223,70 @@ apiRouter.get("/footer", (req, res) => {
 	res.sendFile(__dirname + "/public/resources/footer.html");
 });
 
+apiRouter.post("/sign-up", async (req, res) => {
+    let body = req.body;
+
+    if(body.email && body.name && body.password && body.confirmPassword) {
+        if(!body.email.match(/[a-z0-9!#$%&'*+/=?^_\`{|}~-]+(?:\.[a-z0-9!#$%&\'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/)) {
+            // invalid email
+            res.status(400).redirect("back");
+        } else if(body.password !== body.confirmPassword) {
+            // nonmatching passwords
+            res.status(400).redirect("back");
+        } else if(!/[A-Z].*[A-Z]/.test(body.password) || !/[0-9].*[0-9]/.test(body.password) || body.password.length < 8) {
+            // weak password (must have at least 2 uppercase letters and 2 digits with a total password length of 8 or more characters)
+            res.status(400).redirect("back");
+        } else {
+			if((await readDB("Visitors", "Accounts", { "email" : body.email })).length) {
+				res.redirect("/pages/login");
+				return;
+			}
+			if((await readDB("Visitors", "Banned", { "ip" : req.socket.remoteAddress })).length) {
+				res.send("No you are bad and banned have a horrible life");
+				return;
+			}
+
+
+			// create account
+			let salt = await genSalt(Math.floor(Math.random() * 10));
+			let hash = await genHash(body.password, salt);
+
+			let userObj = {
+				hash: hash,
+				email: body.email,
+				name: body.name,
+				created: new Date(),
+				confirmed: false,
+				ip: req.socket.remoteAddress
+			};
+
+			client.db("Visitors").collection("Accounts").insertOne(userObj, (err, result) => {
+				if(err) console.error(err);
+
+				let token = jwt.sign(userObj, process.env.VERIFY_SECRET);
+
+				sendEmail({
+					from: process.env.EMAIL_NAME,
+					to: body.email,
+					subject: "Confirm your account",
+					text: "idk confirm your account",
+					html: "idk confirm your account"
+				})
+			});
+        }
+    } else {
+        // missing body values
+        res.status(400).redirect("/pages/sign-up");
+    }
+});
+
 apiRouter.post("/contact", (req, res) => {
 	var body = req.body;
 
 	if(body.name && body.email && body.purpose && body.additional) {
 		sendEmail({
 		    service : "gmail",
-			user : "stranothusbot@gmail.com",
-			password : process.env["EMAIL_PASS"],
+			user : process.env.EMAIL_NAME,
 			to : "stranothus@gmail.com",
 			subject : "Stranothus Studios Contact",
 			content : `${body.name} has contacted you to discuss a website to ${body.purpose}. Additional information: ${body.additional}\n\nContact them at ${body.email}`
@@ -210,70 +299,47 @@ apiRouter.post("/contact", (req, res) => {
 });
 
 apiRouter.route("/portfolio")
-	.get((req, res) => {
+	.get(async (req, res) => {
 		//get the entire portfolio database
-		readDB("/portfolio.json", (err, content) => {
-			if(err) throw err;
+		let results = await readDB("Content", "Portfolio", {});
 
-			let c = JSON.parse(content);
+		results.push(req.token ? req.token.perms === "Admin" : false);
 
-			c.push(req.cookies.password === process.env["admin_password"]);
-			
-			res.json(c);
-		});
+		res.json(results);
 	})
 	.post((req, res) => {
 		//create a new portfolio post or edit an old one
 		let body = req.body;
-		console.log(body.index);
+
 		if(req.loggedIn && req.files && body.title && body.link && body.about && body.why && body.how && !body.index) {
-			let index = 0;
-			updateDB("/portfolio.json",
-				contents => {
-					index = contents.length;
+			let index = (await readDB("Content", "Portfolio", {})).length;
+			client.db("Content").collection("Portfolio").insertOne({
+				"image" : req.files[0].path.replace(/^([a-zA-Z\/\-]+?)\/public/, ""),
+				"title" : body.title,
+				"link" : body.link,
+				"about" : body.about,
+				"why" : body.why,
+				"how" : body.how
+			}, (err, result) => {
+				if(err) console.error(err);
 
-					contents.push({
-						"image" : req.files[0].path.replace(/^([a-zA-Z\/\-]+?)\/public/, ""),
-						"title" : body.title,
-						"link" : body.link,
-						"about" : body.about,
-						"why" : body.why,
-						"how" : body.how
-					});
-
-					return contents;
-				},
-				() => {
-					log("POST", "Portfolio expanded '/page/project/" + index + "'");
-					res.redirect("/page/project/" + index);
-				}
-			);
+				log("POST", "Portfolio expanded '/page/project/" + index + "'");
+				res.redirect("/page/project/" + index);
+			});
 		} else if(req.loggedIn && body.index + 1) {
-			updateDB("/portfolio.json",
-				contents => {
-					if(contents.length > body.index) {
-						let index = contents[body.index];
+			client.db("Content").collection("Portfolio").updateOne({ "index": body.index }, {
+				...(req.files.length? { "image" : req.files[0].path.replace(/^([a-zA-Z\/\-]+?)\/public/, "") } : {}),
+				...(body.title ? { "title" : body.title } : {}),
+				...(body.link ? { "link" : body.link } : {}),
+				...(body.about ? { "about" : body.about } : {}),
+				...(body.why ? { "why" : body.why } : {}),
+				...(body.how ? { "how" : body.how } : {})
+			}, (err, result) => {
+				if(err) console.error(err);
 
-						log("POST", `Portfolio project '/page/project/${body.index}' of previosu construct '${JSON.stringify(index, null, 4)}' edited`);
-						
-						contents[body.index] = {
-							"image" : !!req.files[0] ? req.files[0].path.replace(/^([a-zA-Z\/\-]+?)\/public/, "") : index.image,
-							"title" : body.title || index.title,
-							"link" : body.link || index.link,
-							"about" : body.about || index.about,
-							"why" : body.why || index.why,
-							"how" : body.how || index.how
-						};
-					} else {
-						log("FAIL", "Malformed portfolio project edit");
-					}
-
-					return contents;
-				},
-				() => {
-					res.redirect("/page/project/" + body.index);
-				}
-			);
+				log("POST", `Portfolio project '/page/project/${body.index}' edited`);
+				res.redirect("/page/project/" + index);
+			});
 		} else {
 			log("FAIL", "Malformed portfolio project edit or create");
 			res.send("Failure ;-;");
@@ -284,21 +350,11 @@ apiRouter.route("/portfolio")
 		let body = req.body;
 
 		if(req.loggedIn && body.index + 1) {
-			updateDB("/portfolio.json",
-				contents => {
-					if(contents.length > body.index) {
-						log("DELETE", `Portfolio project of construct '${JSON.stringify(contents[body.index], null, 4)}' deleted`)
-						contents.splice(body.index, 1);
-					} else {
-						log("FAIL", "Malformed portfolio project delete");
-					}
+			client.db("Content").collection("Portfolio").deleteOne({ "index": body.index }, (err, result) => {
+				if(err) console.error(err);
 
-					return contents;
-				},
-				() => {
-					res.send("Success!");
-				}
-			)
+				res.send("Success!");
+			});
 		} else {
 			log("FAIL", "Malformed portfolio project delete");
 			res.send("Failure ;-;");
