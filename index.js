@@ -59,7 +59,7 @@ const client = new Promise((resolve, reject) => {
 			useUnifiedTopology: true
 		},
 		(err, client) => {
-			if(err) console.err(err);
+			if(err) console.error(err);
 
 			resolve(client);
 		}
@@ -80,7 +80,7 @@ const client = new Promise((resolve, reject) => {
 async function readDB(db, coll, query) {
 	return new Promise((resolve, reject) => {
 		client.db(db).collection(coll).find(query).toArray((err, results) => {
-			if(err) console.error(err);
+			if(err) console.erroror(err);
 
 			resolve(results);
 		});
@@ -97,7 +97,7 @@ async function readDB(db, coll, query) {
  */
 const sendEmail = async mailOptions => {
 	return new Promise((resolve, reject) => transporter.sendMail(mailOptions, (err, info) => {
-		if (err) console.error(err);
+		if (err) console.erroror(err);
 
 		resolve(info);
 	}));
@@ -260,7 +260,7 @@ apiRouter.post("/sign-up", async (req, res) => {
 			};
 
 			client.db("Visitors").collection("Accounts").insertOne(userObj, (err, result) => {
-				if(err) console.error(err);
+				if(err) console.erroror(err);
 
 				let token = jwt.sign(userObj, process.env.VERIFY_SECRET);
 
@@ -350,7 +350,7 @@ apiRouter.get("/verify/:token", (req, res) => {
 	}
 
 	client.db("Visitors").collection("Accounts").updateOne(token, { "$set": { "confirmed": true }}, (err, result) => {
-		if(err) console.error(err);
+		if(err) console.erroror(err);
 
 		token.confirmed = true;
 
@@ -407,7 +407,7 @@ apiRouter.route("/portfolio")
 				"how": body.how,
 				"created": new Date()
 			}, (err, result) => {
-				if(err) console.error(err);
+				if(err) console.erroror(err);
 
 				log("POST", "Portfolio expanded '/page/project/" + index + "'");
 				res.redirect("/page/project/" + index);
@@ -425,7 +425,7 @@ apiRouter.route("/portfolio")
 				...(body.why ? { "why": body.why } : {}),
 				...(body.how ? { "how": body.how } : {})
 			}}, (err, result) => {
-				if(err) console.error(err);
+				if(err) console.erroror(err);
 
 				log("POST", `Portfolio project '/page/project/${body.index}' edited`);
 				res.redirect("/page/project/" + index);
@@ -445,7 +445,7 @@ apiRouter.route("/portfolio")
 				return;
 			}
 			client.db("Content").collection("Portfolio").deleteOne({ "index": body.created }, (err, result) => {
-				if(err) console.error(err);
+				if(err) console.erroror(err);
 
 				res.send("Success!");
 			});
@@ -478,7 +478,7 @@ apiRouter.route("/blog")
 				"content": body.content,
 				"topics": body.topics.split(/,\s*/)
 			}}, (err, result) => {
-				if(err) console.error(err);
+				if(err) console.erroror(err);
 
 				log("POST", `Blog post edited`);
 				res.send("Success!");
@@ -504,7 +504,7 @@ apiRouter.route("/blog")
 				"content": body.content,
 				"topics": body.topics.split(/,\s*/)
 			}, (err, result) => {
-				if(err) console.error(err);
+				if(err) console.erroror(err);
 	
 				log("POST", `Blog post created`);
 				res.send("Success!");
@@ -524,7 +524,7 @@ apiRouter.route("/blog")
 				return;
 			}
 			client.db("Content").collection("Blog").deleteOne({ "index": body.index }, (err, result) => {
-				if(err) console.error(err);
+				if(err) console.erroror(err);
 
 				log("DELETE", `Blog post deleted`);
 				res.send("Success!");
