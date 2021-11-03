@@ -42,8 +42,6 @@ app.use(route);
 // app.use(loggedIn);
 
 
-const emailPassword = process.env["emailPassword"];
-const gmail = "stranothusbot@gmail.com";
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -53,7 +51,7 @@ const transporter = nodemailer.createTransport({
 });
 
 const client = new Promise((resolve, reject) => {
-	MongoClient.connect("mongodb+srv://stranothus:<password>@cluster0.yp9al.mongodb.net/myFirstDatabase?retryWrites=true&w=majority",
+	MongoClient.connect(`mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.yp9al.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`,
 		{
 			useNewUrlParser: true,
 			useUnifiedTopology: true
@@ -562,7 +560,7 @@ apiRouter.get("/logout", (req, res) => {
 });
 
 
-app.listen("3030s", err => {
+app.listen("3030", err => {
 	if(err) throw err;
 	log("N/A", "Server restarted");
 	console.log("Listening");
