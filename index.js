@@ -268,9 +268,63 @@ apiRouter.post("/sign-up", async (req, res) => {
 					from: process.env.EMAIL_NAME,
 					to: body.email,
 					subject: "Confirm your account",
-					text: "idk confirm your account",
-					html: "idk confirm your account"
-				})
+					text: `You're almost done! You've signed up for an account on Stranothus Studios, but you're not quite done yet. You need to verify your account by clicking the link below. ${process.env.DOMAIN}/api/verify/${token}. Didn't make an account? Someone may be trying to impersonate you. Don't worry, they can't activate their account if you don't click on the link.`,
+					html: `
+						<!DOCTYPE html>
+						<html>
+							<head>
+								<meta charset = "utf-8">
+								<meta name = "viewport" content = "width=device-width">
+								<title>Verify your account</title>
+								<style>
+									body {
+										background-color: #303030;
+										color: #EFEFEF;
+									}
+									h1 {
+										width: 100vw;
+										margin: 50px 0 75px;
+										font-family: "lato", sans-serif;
+										font-size: 2rem;
+										text-align: center;
+										color: #FAC000;
+									}
+									p {
+										margin: 25px 15vw;
+										font-family: "lato", sans-serif;
+										font-size: 1.1rem;
+										line-height: 1.5;
+									}
+									div {
+										margin: 25px 15vw;
+										font-family: "lato", sans-serif;
+										font-size: 0.9rem;
+										line-height: 1.5;
+									}
+									a {
+										display: block;
+										width: 25vw;
+										margin: 100px auto;
+										padding: 10px 0;
+										font-family: "lato", sans-serif;
+										font-size: 1.3rem;
+										text-align: center;
+										border-radius: 5px;
+										background-color: #FAC000;
+										color: #303030;
+										text-decoration: none;
+									}
+								</style>
+							</head>
+							<body>
+								<h1>You're almost done!</h1>
+								<p>You've signed up for an account on Stranothus Studios, but you're not quite done yet. You need to verify your account by clicking the link below.</p>
+								<a href = "${process.env.DOMAIN}/api/verify/${token}">Verify</a>
+								<div>Didn't make an account? Someone may be trying to impersonate you. Don't worry, they can't activate the account if you don't click on the link.</div>
+							</body>
+						</html>
+					`
+				});
 			});
         }
     } else {
