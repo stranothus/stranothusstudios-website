@@ -82,7 +82,7 @@ var client = new Promise((resolve, reject) => {
 async function readDB(db, coll, query) {
 	return new Promise((resolve, reject) => {
 		client.db(db).collection(coll).find(query).toArray((err, results) => {
-			if(err) console.erroror(err);
+			if(err) console.error(err);
 
 			resolve(results);
 		});
@@ -99,7 +99,7 @@ async function readDB(db, coll, query) {
  */
 const sendEmail = async mailOptions => {
 	return new Promise((resolve, reject) => transporter.sendMail(mailOptions, (err, info) => {
-		if (err) console.erroror(err);
+		if (err) console.error(err);
 
 		resolve(info);
 	}));
@@ -211,8 +211,11 @@ pageRouter.get("/project/:filename", (req, res) => {
 });
 
 pageRouter.get("/login", (req, res) => {
-	log("GET", "'/page/login' loaded");
 	res.sendFile(__dirname + "/public/views/login.html");
+});
+
+pageRouter.get("/signup", (req, res) => {
+	res.sendFile(__dirname + "/public/views/signup.html");
 });
 
 
@@ -239,7 +242,7 @@ apiRouter.post("/sign-up", async (req, res) => {
             res.status(400).redirect("back");
         } else {
 			if((await readDB("Visitors", "Accounts", { "email": body.email })).length) {
-				res.redirect("/pages/login");
+				res.redirect("/page/login");
 				return;
 			}
 			if((await readDB("Visitors", "Banned", { "ip": req.socket.remoteAddress })).length) {
@@ -262,7 +265,7 @@ apiRouter.post("/sign-up", async (req, res) => {
 			};
 
 			client.db("Visitors").collection("Accounts").insertOne(userObj, (err, result) => {
-				if(err) console.erroror(err);
+				if(err) console.error(err);
 
 				let token = jwt.sign(userObj, process.env.VERIFY_SECRET);
 
@@ -284,7 +287,6 @@ apiRouter.post("/sign-up", async (req, res) => {
 										color: #EFEFEF;
 									}
 									h1 {
-										width: 100vw;
 										margin: 50px 0 75px;
 										font-family: "lato", sans-serif;
 										font-size: 2rem;
@@ -292,13 +294,15 @@ apiRouter.post("/sign-up", async (req, res) => {
 										color: #FAC000;
 									}
 									p {
-										margin: 25px 15vw;
+										width: 50vw;
+										margin: 0 auto;
 										font-family: "lato", sans-serif;
 										font-size: 1.1rem;
 										line-height: 1.5;
 									}
 									div {
-										margin: 25px 15vw;
+										width: 50vw;
+										margin: 25px auto;
 										font-family: "lato", sans-serif;
 										font-size: 0.9rem;
 										line-height: 1.5;
@@ -321,12 +325,14 @@ apiRouter.post("/sign-up", async (req, res) => {
 							<body>
 								<h1>You're almost done!</h1>
 								<p>You've signed up for an account on Stranothus Studios, but you're not quite done yet. You need to verify your account by clicking the link below.</p>
-								<a href = "${process.env.DOMAIN}/api/verify/${token}">Verify</a>
+								<a href="${process.env.PROTOCOL}${process.env.DOMAIN}/api/verify/${token}">Verify</a>
 								<div>Didn't make an account? Someone may be trying to impersonate you. Don't worry, they can't activate the account if you don't click on the link.</div>
 							</body>
 						</html>
 					`
-				});
+				}).then(info => {
+					res.send("Check your email to confirm your account");
+				})
 			});
         }
     } else {
@@ -351,15 +357,15 @@ apiRouter.get("/verify/:token", (req, res) => {
 		return;
 	}
 
-	client.db("Visitors").collection("Accounts").updateOne(token, { "$set": { "confirmed": true }}, (err, result) => {
-		if(err) console.erroror(err);
+	client.db("Visitors").collection("Accounts").updateOne({ "email": token.email }, { "$set": { "confirmed": true }}, (err, result) => {
+		if(err) console.error(err);
 
 		token.confirmed = true;
 
-		let newToken = jwt.sign(token);
+		let newToken = jwt.sign(token, process.env.VERIFY_SECRET);
 
 		res.cookie("token", newToken);
-		res.redirect("/pages/home");
+		res.redirect("/page/home");
 	});
 });
 
@@ -409,7 +415,7 @@ apiRouter.route("/portfolio")
 				"how": body.how,
 				"created": new Date()
 			}, (err, result) => {
-				if(err) console.erroror(err);
+				if(err) console.error(err);
 
 				log("POST", "Portfolio expanded '/page/project/" + index + "'");
 				res.redirect("/page/project/" + index);
@@ -427,7 +433,7 @@ apiRouter.route("/portfolio")
 				...(body.why ? { "why": body.why } : {}),
 				...(body.how ? { "how": body.how } : {})
 			}}, (err, result) => {
-				if(err) console.erroror(err);
+				if(err) console.error(err);
 
 				log("POST", `Portfolio project '/page/project/${body.index}' edited`);
 				res.redirect("/page/project/" + index);
@@ -447,7 +453,7 @@ apiRouter.route("/portfolio")
 				return;
 			}
 			client.db("Content").collection("Portfolio").deleteOne({ "index": body.created }, (err, result) => {
-				if(err) console.erroror(err);
+				if(err) console.error(err);
 
 				res.send("Success!");
 			});
@@ -480,7 +486,7 @@ apiRouter.route("/blog")
 				"content": body.content,
 				"topics": body.topics.split(/,\s*/)
 			}}, (err, result) => {
-				if(err) console.erroror(err);
+				if(err) console.error(err);
 
 				log("POST", `Blog post edited`);
 				res.send("Success!");
@@ -506,7 +512,7 @@ apiRouter.route("/blog")
 				"content": body.content,
 				"topics": body.topics.split(/,\s*/)
 			}, (err, result) => {
-				if(err) console.erroror(err);
+				if(err) console.error(err);
 	
 				log("POST", `Blog post created`);
 				res.send("Success!");
@@ -526,7 +532,7 @@ apiRouter.route("/blog")
 				return;
 			}
 			client.db("Content").collection("Blog").deleteOne({ "index": body.index }, (err, result) => {
-				if(err) console.erroror(err);
+				if(err) console.error(err);
 
 				log("DELETE", `Blog post deleted`);
 				res.send("Success!");
@@ -545,12 +551,11 @@ apiRouter.post("/login", async (req, res) => {
 		
 		if(!user.length) {
 			res.redirect("back");
-			return;
-		}
-
-		if(await checkHash(body.password, user[0].hash)) {
-			res.cookie("token", jwt.sign(user, process.env.TOKEN_SECRET));
-			res.redirect("/pages/home");
+		} else if(await checkHash(body.password, user[0].hash)) {
+			res.cookie("token", jwt.sign(user[0], process.env.TOKEN_SECRET));
+			res.redirect("/page/home");
+		} else {
+			res.redirect("back");
 		}
 	}
 
