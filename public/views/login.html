@@ -13,21 +13,8 @@
 	<body>
 		<form action = "/api/login" method = "POST" enctype = "multipart/form-data">
 			<h2>Login</h2>
+			<input type = "email" name = "email" placeholder = "Email">
 			<input type = "password" name = "password" placeholder = "Password">
-			<select name = "securityQuestionDog">
-				<option selected disabled>--Childhood dog--</option>
-				<option value = "bingo">Bingo</option>
-				<option value = "rover">Rover</option>
-				<option value = "wagsworth">WagWorth</option>
-				<option value = "snoopy">Snoopy</option>
-			</select>
-			<select name = "securityQuestionOrigin">
-				<option selected disabled>--State of Birth--</option>
-				<option value = "virginia">Virginia</option>
-				<option value = "california">California</option>
-				<option value = "oregon">Oregon</option>
-				<option value = "florida">Florida</option>
-			</select>
 			<button type = "submit">Login</button>
 		</form>
 	</body>
