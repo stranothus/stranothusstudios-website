@@ -10,13 +10,12 @@ const dotenv = require("dotenv");
 dotenv.config();
 
 const { genSalt, genHash, checkHash } = require("./utils/hash.js");
-const { c } = require("tar");
 
 const storage = multer.diskStorage({
-    destination : function (req, file, cb) {
+    destination: function (req, file, cb) {
       	cb(null, __dirname + "/public/uploads");
     },
-    filename : function (req, file, cb) {
+    filename: function (req, file, cb) {
       	cb(null, file.originalname);
     }
 });
@@ -24,12 +23,12 @@ const storage = multer.diskStorage({
 const app = express();
 const body = express.json();
 const cookies = cookieParser();
-const upload = multer({ storage : storage });
+const upload = multer({ storage: storage });
 const uploadArray = upload.array("file");
 const route = express.static(__dirname + "/public");
 const loggedIn = (req, res, next) => {
 	if(req.cookies.token) {
-		req.token = jwt.verify(req.cookies.token, process.env.TOKEN_SECRET);
+		req.loggedIn = jwt.verify(req.cookies.token, process.env.TOKEN_SECRET);
 	}
 
 	next();
@@ -47,9 +46,9 @@ const emailPassword = process.env["emailPassword"];
 const gmail = "stranothusbot@gmail.com";
 const transporter = nodemailer.createTransport({
     service: 'gmail',
-    auth : {
-		user : process.env.EMAIL_NAME,
-		pass : process.env.EMAIL_PASS
+    auth: {
+		user: process.env.EMAIL_NAME,
+		pass: process.env.EMAIL_PASS
 	}
 });
 
@@ -92,7 +91,7 @@ async function readDB(db, coll, query) {
 /**
  * Sends mail using the specified mailOptions
  * 
- * @param {{from : string, to : string, subject : string, text : string, html : string}} mailOptions - set of options to specify what to mail who
+ * @param {{from: string, to: string, subject: string, text: string, html: string}} mailOptions - set of options to specify what to mail who
  * 
  * @returns {Promise<object>} Info - informations on the sent mail
  */
@@ -153,7 +152,7 @@ const projectHTML = (title, image, about, how, why) => {
 				<link href = "/styles/project.css" rel = "stylesheet" type = "text/css" />
 			</head>
 			<body>
-				<div id = "website-image" style = "background-image : url('${image}');"></div>
+				<div id = "website-image" style = "background-image: url('${image}');"></div>
 				<div id = "info-cont">
 					<div class = "info-box">
 						<h2>About</h2>
@@ -190,19 +189,19 @@ app.get("/", (req, res) => {
 
 
 pageRouter.get("/home", (req, res) => {
-	res.sendFile(__dirname + "/public/views/home.html");
+	res.sendFile(`${__dirname}/public/views/home.html`);
 });
 
 pageRouter.get("/portfolio", (req, res) => {
-	res.sendFile(__dirname + "/public/views/portfolio.html");
+	res.sendFile(`${__dirname}/public/views/portfolio.html`);
 });
 
 pageRouter.get("/contact", (req, res) => {
-	res.sendFile(__dirname + "/public/views/contact.html");
+	res.sendFile(`${__dirname}/public/views/contact.html`);
 });
 
 pageRouter.get("/blog", (req, res) => {
-	res.sendFile(__dirname + "/public/views/blog.html");
+	res.sendFile(`${__dirname}/public/views/blog.html`);
 });
 
 pageRouter.get("/project/:filename", (req, res) => {
@@ -237,11 +236,11 @@ apiRouter.post("/sign-up", async (req, res) => {
             // weak password (must have at least 2 uppercase letters and 2 digits with a total password length of 8 or more characters)
             res.status(400).redirect("back");
         } else {
-			if((await readDB("Visitors", "Accounts", { "email" : body.email })).length) {
+			if((await readDB("Visitors", "Accounts", { "email": body.email })).length) {
 				res.redirect("/pages/login");
 				return;
 			}
-			if((await readDB("Visitors", "Banned", { "ip" : req.socket.remoteAddress })).length) {
+			if((await readDB("Visitors", "Banned", { "ip": req.socket.remoteAddress })).length) {
 				res.send("No you are bad and banned have a horrible life");
 				return;
 			}
@@ -285,11 +284,11 @@ apiRouter.post("/contact", (req, res) => {
 
 	if(body.name && body.email && body.purpose && body.additional) {
 		sendEmail({
-		    service : "gmail",
-			user : process.env.EMAIL_NAME,
-			to : "stranothus@gmail.com",
-			subject : "Stranothus Studios Contact",
-			content : `${body.name} has contacted you to discuss a website to ${body.purpose}. Additional information: ${body.additional}\n\nContact them at ${body.email}`
+		    service: "gmail",
+			user: process.env.EMAIL_NAME,
+			to: "stranothus@gmail.com",
+			subject: "Stranothus Studios Contact",
+			content: `${body.name} has contacted you to discuss a website to ${body.purpose}. Additional information: ${body.additional}\n\nContact them at ${body.email}`
 		});
 		res.status(200).redirect("/page/contact");
 	} else {
@@ -303,7 +302,7 @@ apiRouter.route("/portfolio")
 		//get the entire portfolio database
 		let results = await readDB("Content", "Portfolio", {});
 
-		results.push(req.token ? req.token.perms === "Admin" : false);
+		results.push(req.loggedIn ? req.loggedIn.perms === "Admin" : false);
 
 		res.json(results);
 	})
@@ -311,37 +310,38 @@ apiRouter.route("/portfolio")
 		//create a new portfolio post or edit an old one
 		let body = req.body;
 
-		if(req.loggedIn && req.files && body.title && body.link && body.about && body.why && body.how && !body.index) {
-			if(req.token.perms !== "Admin") {
+		if(req.loggedIn && req.files && body.title && body.link && body.about && body.why && body.how && !body.created) {
+			if(req.loggedIn.perms !== "Admin") {
 				res.send("You ain't admin");
 				return;
 			}
 			let index = (await readDB("Content", "Portfolio", {})).length;
 			client.db("Content").collection("Portfolio").insertOne({
-				"image" : req.files[0].path.replace(/^([a-zA-Z\/\-]+?)\/public/, ""),
-				"title" : body.title,
-				"link" : body.link,
-				"about" : body.about,
-				"why" : body.why,
-				"how" : body.how
+				"image": req.files[0].path.replace(/^([a-zA-Z\/\-]+?)\/public/, ""),
+				"title": body.title,
+				"link": body.link,
+				"about": body.about,
+				"why": body.why,
+				"how": body.how,
+				"created": new Date()
 			}, (err, result) => {
 				if(err) console.error(err);
 
 				log("POST", "Portfolio expanded '/page/project/" + index + "'");
 				res.redirect("/page/project/" + index);
 			});
-		} else if(req.loggedIn && body.index + 1) {
-			if(req.token.perms !== "Admin") {
+		} else if(req.loggedIn && body.created) {
+			if(req.loggedIn.perms !== "Admin") {
 				res.send("You ain't admin");
 				return;
 			}
-			client.db("Content").collection("Portfolio").updateOne({ "index": body.index }, {
-				...(req.files.length? { "image" : req.files[0].path.replace(/^([a-zA-Z\/\-]+?)\/public/, "") } : {}),
-				...(body.title ? { "title" : body.title } : {}),
-				...(body.link ? { "link" : body.link } : {}),
-				...(body.about ? { "about" : body.about } : {}),
-				...(body.why ? { "why" : body.why } : {}),
-				...(body.how ? { "how" : body.how } : {})
+			client.db("Content").collection("Portfolio").updateOne({ "created": body.created }, {
+				...(req.files.length? { "image": req.files[0].path.replace(/^([a-zA-Z\/\-]+?)\/public/, "") }: {}),
+				...(body.title ? { "title": body.title } : {}),
+				...(body.link ? { "link": body.link } : {}),
+				...(body.about ? { "about": body.about } : {}),
+				...(body.why ? { "why": body.why } : {}),
+				...(body.how ? { "how": body.how } : {})
 			}, (err, result) => {
 				if(err) console.error(err);
 
@@ -357,12 +357,12 @@ apiRouter.route("/portfolio")
 		//delete a portfolio post
 		let body = req.body;
 
-		if(req.loggedIn && body.index + 1) {
-			if(req.token.perms !== "Admin") {
+		if(req.loggedIn && body.created) {
+			if(req.loggedIn.perms !== "Admin") {
 				res.send("You ain't admin");
 				return;
 			}
-			client.db("Content").collection("Portfolio").deleteOne({ "index": body.index }, (err, result) => {
+			client.db("Content").collection("Portfolio").deleteOne({ "index": body.created }, (err, result) => {
 				if(err) console.error(err);
 
 				res.send("Success!");
@@ -375,43 +375,32 @@ apiRouter.route("/portfolio")
 
 apiRouter.route("/blog")
 	.get((req, res) => {
-		//get the entire blog database
-		readDB("/blog.json", (err, content) => {
-			if(err) throw err;
+		//get the entire portfolio database
+		let results = await readDB("Content", "Blog", {});
 
-			let c = JSON.parse(content);
+		results.push(req.loggedIn ? req.loggedIn.perms === "Admin" : false);
 
-			c.push(req.loggedIn);
-
-			res.json(c);
-		});
+		res.json(results);
 	})
 	.put((req, res) => {
 		//edit a blog post
 		let body = req.body;
 
-		if(req.loggedIn && body.title && body.topics && body.content && body.index + 1) {
-			updateDB("/blog.json",
-				contents => {
-					if(contents.length > body.index && body.index > 0) {
-						log("PUT", `Blog post '${body.index}' of previous construct '${JSON.stringify(contents[body.index], null, 4)}' edited`);
-						contents[body.index] = {
-							"title" : body.title,
-							"date" : contents[body.index].date,
-							"content" : body.content,
-							"topics" : body.topics.split(/,\s*/)
-						}
-					} else {
-						log("FAIL", "Malformed blog post edit");
-					}
+		if(req.loggedIn && body.title && body.topics && body.content && body.created) {
+			if(req.loggedIn.perms !== "Admin") {
+				res.send("You ain't admin");
+				return;
+			}
+			client.db("Content").collection("Blog").updateOne({ "created": body.created }, {
+				"title": body.title,
+				"content": body.content,
+				"topics": body.topics.split(/,\s*/)
+			}, (err, result) => {
+				if(err) console.error(err);
 
-					return contents;
-				},
-				() => {
-					log("FAIL", "Malformed blog post edit");
-					res.send("Success!");
-				}
-			);
+				log("POST", `Blog post edited`);
+				res.send("Success!");
+			});
 		} else {
 			log("FAIL", "Malformed blog post edit");
 			res.send("Failure ;-;");
@@ -422,22 +411,22 @@ apiRouter.route("/blog")
 		let body = req.body;
 		
 		if(req.loggedIn && body.title && body.topics && body.content) {
-			updateDB("/blog.json",
-				contents => {
-					contents.push({
-						"title" : body.title,
-						"date" : new Date(),
-						"content" : body.content,
-						"topics" : body.topics.split(/,\s*/)
-					});
-
-					return contents;
-				},
-				() => {
-					log("POST", `Blog post created`);
-					res.send("Success!");
-				}
-			);
+			if(req.loggedIn.perms !== "Admin") {
+				res.send("You ain't admin");
+				return;
+			}
+	
+			client.db("Content").collection("Blog").insertOne({
+				"title": body.title,
+				"date": new Date(),
+				"content": body.content,
+				"topics": body.topics.split(/,\s*/)
+			}, (err, result) => {
+				if(err) console.error(err);
+	
+				log("POST", `Blog post created`);
+				res.send("Success!");
+			});
 		} else {
 			log("FAIL", "Malformed blog post create");
 			res.send("Failure ;-;");
@@ -448,21 +437,16 @@ apiRouter.route("/blog")
 		let body = req.body;
 
 		if(req.loggedIn && body.index + 1) {
-			updateDB("/blog.json",
-				contents => {
-					if(contents.length > body.index) {
-						log("DELETE", `Blog post of previous construct '${JSON.stringify(contents[body.index], null, 4)}' deleted`);
-						contents.splice(body.index, 1);
-					} else {
-						log("FAIL", "Malformed blog post delete");
-					}
+			if(req.loggedIn.perms !== "Admin") {
+				res.send("You ain't admin");
+				return;
+			}
+			client.db("Content").collection("Blog").deleteOne({ "index": body.index }, (err, result) => {
+				if(err) console.error(err);
 
-					return contents;
-				},
-				() => {
-					res.send("Success!");
-				}
-			)
+				log("DELETE", `Blog post deleted`);
+				res.send("Success!");
+			});
 		} else {
 			log("FAIL", "Malformed blog post delete");
 			res.send("Failure ;-;");
@@ -472,11 +456,18 @@ apiRouter.route("/blog")
 apiRouter.post("/login", (req, res) => {
 	let body = req.body;
 
-	if(body.password === process.env["admin_password"] && body.securityQuestionDog === process.env["dog"] && body.securityQuestionOrigin === process.env["origin"]) {
-		log("POST", "Login success");
-		res.cookie("password", body.password);
-	} else {
-		log("POST", `Login attempt failed with password input '${body.password}' and secruity answers '${body.securityQuestionDog}' and '${body.securityQuestionOrigin}'`);
+	if(body.password && body.email) {
+		let user = await readDB("Visitors", "Accounts", { "email": body.email });
+		
+		if(!user.length) {
+			res.redirect("back");
+			return;
+		}
+
+		if(await checkHash(body.password, user[0].hash)) {
+			res.cookie("token", jwt.sign(user, process.env.TOKEN_SECRET));
+			res.redirect("/pages/home");
+		}
 	}
 
 	res.redirect("/page/home");
@@ -484,12 +475,12 @@ apiRouter.post("/login", (req, res) => {
 
 apiRouter.get("/logout", (req, res) => {
 	log("GET", "Logout");
-	res.clearCookie("password");
+	res.clearCookie("token");
 	res.redirect("/page/home");
 });
 
 
-app.listen("8080", err => {
+app.listen("3030s", err => {
 	if(err) throw err;
 	log("N/A", "Server restarted");
 	console.log("Listening");
