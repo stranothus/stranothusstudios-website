@@ -333,6 +333,34 @@ apiRouter.post("/sign-up", async (req, res) => {
     }
 });
 
+apiRouter.get("/verify/:token", (req, res) => {
+	let params = req.params;
+	let token = params.token;
+
+	if(!token) {
+		res.status(400).send();
+		return;
+	}
+	
+	token = jwt.verify(token, process.env.VERIFY_SECRET);
+
+	if(!token) {
+		res.status(400).send();
+		return;
+	}
+
+	client.db("Visitors").collection("Accounts").updateOne(token, { "$set": { "confirmed": true }}, (err, result) => {
+		if(err) console.error(err);
+
+		token.confirmed = true;
+
+		let newToken = jwt.sign(token);
+
+		res.cookie("token", newToken);
+		res.redirect("/pages/home");
+	});
+});
+
 apiRouter.post("/contact", (req, res) => {
 	var body = req.body;
 
@@ -389,14 +417,14 @@ apiRouter.route("/portfolio")
 				res.send("You ain't admin");
 				return;
 			}
-			client.db("Content").collection("Portfolio").updateOne({ "created": body.created }, {
+			client.db("Content").collection("Portfolio").updateOne({ "created": body.created }, { "$set": {
 				...(req.files.length? { "image": req.files[0].path.replace(/^([a-zA-Z\/\-]+?)\/public/, "") }: {}),
 				...(body.title ? { "title": body.title } : {}),
 				...(body.link ? { "link": body.link } : {}),
 				...(body.about ? { "about": body.about } : {}),
 				...(body.why ? { "why": body.why } : {}),
 				...(body.how ? { "how": body.how } : {})
-			}, (err, result) => {
+			}}, (err, result) => {
 				if(err) console.error(err);
 
 				log("POST", `Portfolio project '/page/project/${body.index}' edited`);
@@ -445,11 +473,11 @@ apiRouter.route("/blog")
 				res.send("You ain't admin");
 				return;
 			}
-			client.db("Content").collection("Blog").updateOne({ "created": body.created }, {
+			client.db("Content").collection("Blog").updateOne({ "created": body.created }, { "$set": {
 				"title": body.title,
 				"content": body.content,
 				"topics": body.topics.split(/,\s*/)
-			}, (err, result) => {
+			}}, (err, result) => {
 				if(err) console.error(err);
 
 				log("POST", `Blog post edited`);
