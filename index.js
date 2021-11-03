@@ -9,7 +9,7 @@ const dotenv = require("dotenv");
 
 dotenv.config();
 
-const { genSalt, genHash, checkHash } = require("./utils/hash.js");
+const { genSalt, genHash, checkHash } = require("./utils/encrypt.js");
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -388,7 +388,7 @@ apiRouter.route("/portfolio")
 
 		res.json(results);
 	})
-	.post((req, res) => {
+	.post(async (req, res) => {
 		//create a new portfolio post or edit an old one
 		let body = req.body;
 
@@ -456,7 +456,7 @@ apiRouter.route("/portfolio")
 	});
 
 apiRouter.route("/blog")
-	.get((req, res) => {
+	.get( async (req, res) => {
 		//get the entire portfolio database
 		let results = await readDB("Content", "Blog", {});
 
@@ -535,7 +535,7 @@ apiRouter.route("/blog")
 		}
 	});
 
-apiRouter.post("/login", (req, res) => {
+apiRouter.post("/login", async (req, res) => {
 	let body = req.body;
 
 	if(body.password && body.email) {
