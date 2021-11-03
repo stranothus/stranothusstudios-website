@@ -5,7 +5,7 @@ const bcrypt = require("bcrypt");
  * 
  * @param {number} s - The number to use for the salt
  * 
- * @returns {string} salt
+ * @returns {Promise<string>} salt
  */
 const genSalt = async s => {
     return await bcrypt.genSalt(s).catch(err => { throw err; });
@@ -18,7 +18,7 @@ const genSalt = async s => {
  * 
  * @param {string} salt - the salt
  * 
- * @returns {string} hash
+ * @returns {Promise<string>} hash
  */
 const genHash = async (hash, salt) => {
     return await bcrypt.hash(hash, salt).catch(err => { throw err; });
@@ -31,7 +31,7 @@ const genHash = async (hash, salt) => {
  * 
  * @param {string} hash - the hash to check against
  * 
- * @returns {boolean} matches
+ * @returns {Promise<boolean>} matches
  */
 const checkHash = async (string, hash) => {
     return await bcrypt.compare(string, hash).catch(err => { throw err; });
