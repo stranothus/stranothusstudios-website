@@ -46,8 +46,8 @@ function setup() {
 			let index = data[i];
 
 			index["i"] = data.length - i - 1;
-			
-			let markedContent = $create(`<div id = "post-content">${marked(index.content)}</div>`);
+
+			let markedContent = $create(`<div id = "post-content">${marked.marked(index.content)}</div>`);
 			let codes = markedContent.querySelectorAll("pre code");
 			
 			if(codes) {
