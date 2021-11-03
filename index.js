@@ -28,7 +28,11 @@ const uploadArray = upload.array("file");
 const route = express.static(__dirname + "/public");
 const loggedIn = (req, res, next) => {
 	if(req.cookies.token) {
-		req.loggedIn = jwt.verify(req.cookies.token, process.env.TOKEN_SECRET);
+		try {
+			req.loggedIn = jwt.verify(req.cookies.token, process.env.TOKEN_SECRET);
+		} catch(err) {
+			req.loggedIn = undefined;
+		}
 	}
 
 	next();
@@ -50,7 +54,7 @@ const transporter = nodemailer.createTransport({
 	}
 });
 
-const client = new Promise((resolve, reject) => {
+var client = new Promise((resolve, reject) => {
 	MongoClient.connect(`mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.yp9al.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`,
 		{
 			useNewUrlParser: true,
@@ -62,7 +66,7 @@ const client = new Promise((resolve, reject) => {
 			resolve(client);
 		}
 	);
-}).then(client => { return client; });
+}).then(c => { client = c; });
 
 /**
  * Reads a database and returns the results of a query asynchronously
