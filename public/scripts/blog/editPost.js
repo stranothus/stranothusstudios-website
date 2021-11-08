@@ -8,7 +8,7 @@ function editPost(index, callback) {
 			"title" : index.title,
 			"topics" : index.topics,
 			"content" : index.content,
-			"index" : index.i
+			"date" : index.date
 		})
 	})
 	.then(response => {

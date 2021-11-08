@@ -29,8 +29,10 @@ const route = express.static(__dirname + "/public");
 const loggedIn = (req, res, next) => {
 	if(req.cookies.token) {
 		try {
-			req.loggedIn = jwt.verify(req.cookies.token, process.env.TOKEN_SECRET);
+			let token = jwt.verify(req.cookies.token, process.env.TOKEN_SECRET);
+			req.loggedIn = token;
 		} catch(err) {
+			res.clearCookie("token");
 			req.loggedIn = undefined;
 		}
 	}
@@ -261,6 +263,7 @@ apiRouter.post("/sign-up", async (req, res) => {
 				name: body.name,
 				created: new Date(),
 				confirmed: false,
+				perms: "user",
 				ip: req.socket.remoteAddress
 			};
 
@@ -392,7 +395,7 @@ apiRouter.route("/portfolio")
 		//get the entire portfolio database
 		let results = await readDB("Content", "Portfolio", {});
 
-		results.push(req.loggedIn ? req.loggedIn.perms === "Admin" : false);
+		results.push(req.loggedIn ? req.loggedIn.perms === "admin" : false);
 
 		res.json(results);
 	})
@@ -401,7 +404,7 @@ apiRouter.route("/portfolio")
 		let body = req.body;
 
 		if(req.loggedIn && req.files && body.title && body.link && body.about && body.why && body.how && !body.created) {
-			if(req.loggedIn.perms !== "Admin") {
+			if(req.loggedIn.perms !== "admin") {
 				res.send("You ain't admin");
 				return;
 			}
@@ -421,7 +424,7 @@ apiRouter.route("/portfolio")
 				res.redirect("/page/project/" + index);
 			});
 		} else if(req.loggedIn && body.created) {
-			if(req.loggedIn.perms !== "Admin") {
+			if(req.loggedIn.perms !== "admin") {
 				res.send("You ain't admin");
 				return;
 			}
@@ -448,7 +451,7 @@ apiRouter.route("/portfolio")
 		let body = req.body;
 
 		if(req.loggedIn && body.created) {
-			if(req.loggedIn.perms !== "Admin") {
+			if(req.loggedIn.perms !== "admin") {
 				res.send("You ain't admin");
 				return;
 			}
@@ -468,7 +471,7 @@ apiRouter.route("/blog")
 		//get the entire portfolio database
 		let results = await readDB("Content", "Blog", {});
 
-		results.push(req.loggedIn ? req.loggedIn.perms === "Admin" : false);
+		results.push(req.loggedIn ? req.loggedIn.perms === "admin" : false);
 
 		res.json(results);
 	})
@@ -476,12 +479,13 @@ apiRouter.route("/blog")
 		//edit a blog post
 		let body = req.body;
 
-		if(req.loggedIn && body.title && body.topics && body.content && body.created) {
-			if(req.loggedIn.perms !== "Admin") {
+		if(req.loggedIn && body.title && body.topics && body.content && body.date) {
+			if(req.loggedIn.perms !== "admin") {
 				res.send("You ain't admin");
 				return;
 			}
-			client.db("Content").collection("Blog").updateOne({ "created": body.created }, { "$set": {
+
+			client.db("Content").collection("Blog").updateOne({ "date": new Date(body.date) }, { "$set": {
 				"title": body.title,
 				"content": body.content,
 				"topics": body.topics.split(/,\s*/)
@@ -501,7 +505,7 @@ apiRouter.route("/blog")
 		let body = req.body;
 		
 		if(req.loggedIn && body.title && body.topics && body.content) {
-			if(req.loggedIn.perms !== "Admin") {
+			if(req.loggedIn.perms !== "admin") {
 				res.send("You ain't admin");
 				return;
 			}
@@ -526,12 +530,12 @@ apiRouter.route("/blog")
 		//delete a blog post
 		let body = req.body;
 
-		if(req.loggedIn && body.index + 1) {
-			if(req.loggedIn.perms !== "Admin") {
+		if(req.loggedIn && body.date) {
+			if(req.loggedIn.perms !== "admin") {
 				res.send("You ain't admin");
 				return;
 			}
-			client.db("Content").collection("Blog").deleteOne({ "index": body.index }, (err, result) => {
+			client.db("Content").collection("Blog").deleteOne({ "date": new Date(body.date) }, (err, result) => {
 				if(err) console.error(err);
 
 				log("DELETE", `Blog post deleted`);
@@ -557,9 +561,29 @@ apiRouter.post("/login", async (req, res) => {
 		} else {
 			res.redirect("back");
 		}
+	} else {
+		res.redirect("back");
 	}
+});
 
-	res.redirect("/page/home");
+apiRouter.get("/refresh", (req, res) => {
+	if(req.loggedIn) {
+		client.db("Visitors").collection("Accounts").findOne({ "hash": req.loggedIn.hash }, (err, result) => {
+			if(err) console.error(err);
+
+			if(result) {
+				let token = jwt.sign(result, process.env.TOKEN_SECRET);
+
+				res.cookie("token", token);
+				res.redirect("back");
+			} else {
+				res.clearCookie("token");
+				res.redirect("/page/login");
+			}
+		})
+	} else {
+		res.redirect("/page/login");
+	}
 });
 
 apiRouter.get("/logout", (req, res) => {

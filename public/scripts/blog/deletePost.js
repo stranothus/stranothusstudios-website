@@ -1,11 +1,11 @@
-function deletePost(index, callback) {
+function deletePost(date, callback) {
 	fetch("/api/blog", {
 		method : "DELETE",
 		headers : {
 			"Content-Type" : "application/json"
 		},
 		body : JSON.stringify({
-			"index" : index
+			"date" : date
 		})
 	})
 	.then(response => {

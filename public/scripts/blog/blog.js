@@ -87,10 +87,10 @@ function setup() {
 
 					let saveEditElement = $create(`<button>Save edit</button>`);
 
-					saveEditElement.dataset.index = index.i;
+					saveEditElement.dataset.date = i.date;
 
 					saveEditElement.addEventListener("click", function() {
-						let index = Number(this.dataset.index);
+						let date = this.dataset.date;
 
 						let p = this.parentElement;
 
@@ -98,7 +98,7 @@ function setup() {
 							"title" : p.querySelector("#title").value,
 							"content" : p.querySelector("#content").value,
 							"topics" : p.querySelector("#topics").value,
-							"i" : index
+							"date" : new Date(date)
 						}, setup);
 					});
 
@@ -113,11 +113,11 @@ function setup() {
 				let deleteButton = $create(`<button>Delete</button>`);
 
 				deleteButton.dataset.title = index.title;
-				deleteButton.dataset.index = index.i;
+				deleteButton.dataset.date = index.date;
 
 				deleteButton.addEventListener("click", function() {
 					if(confirm(`Delete "${this.dataset.title}"?`)) {
-						deletePost(this.dataset.index, setup);
+						deletePost(new Date(this.dataset.date), setup);
 					}
 				});
 
