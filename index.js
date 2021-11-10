@@ -416,19 +416,20 @@ apiRouter.route("/portfolio")
 				"about": body.about,
 				"why": body.why,
 				"how": body.how,
-				"created": new Date()
+				"date": new Date()
 			}, (err, result) => {
 				if(err) console.error(err);
 
 				log("POST", "Portfolio expanded '/page/project/" + index + "'");
 				res.redirect("/page/project/" + index);
 			});
-		} else if(req.loggedIn && body.created) {
+		} else if(req.loggedIn && body.date) {
 			if(req.loggedIn.perms !== "admin") {
 				res.send("You ain't admin");
 				return;
 			}
-			client.db("Content").collection("Portfolio").updateOne({ "created": body.created }, { "$set": {
+
+			client.db("Content").collection("Portfolio").updateOne({ "date": new Date(body.date) }, { "$set": {
 				...(req.files.length? { "image": req.files[0].path.replace(/^([a-zA-Z\/\-]+?)\/public/, "") }: {}),
 				...(body.title ? { "title": body.title } : {}),
 				...(body.link ? { "link": body.link } : {}),
@@ -439,7 +440,7 @@ apiRouter.route("/portfolio")
 				if(err) console.error(err);
 
 				log("POST", `Portfolio project '/page/project/${body.index}' edited`);
-				res.redirect("/page/project/" + index);
+				res.redirect("back");
 			});
 		} else {
 			log("FAIL", "Malformed portfolio project edit or create");
@@ -450,12 +451,12 @@ apiRouter.route("/portfolio")
 		//delete a portfolio post
 		let body = req.body;
 
-		if(req.loggedIn && body.created) {
+		if(req.loggedIn && body.date) {
 			if(req.loggedIn.perms !== "admin") {
 				res.send("You ain't admin");
 				return;
 			}
-			client.db("Content").collection("Portfolio").deleteOne({ "index": body.created }, (err, result) => {
+			client.db("Content").collection("Portfolio").deleteOne({ "date": new Date(body.date) }, (err, result) => {
 				if(err) console.error(err);
 
 				res.send("Success!");

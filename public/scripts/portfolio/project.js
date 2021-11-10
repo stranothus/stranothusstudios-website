@@ -31,7 +31,7 @@ function setup() {
 		how.appendChild(howP);
 
 		if(loggedIn) {
-			let deleteButton = $create(`<button data-index = "${projectIndex}">Delete</button>`);
+			let deleteButton = $create(`<button data-date = "${data[projectIndex].date}">Delete</button>`);
 			deleteButton.addEventListener("click", function() {
 				if(confirm(`Delete ${index.title}?`)) {
 					fetch("/api/portfolio", {
@@ -40,18 +40,20 @@ function setup() {
 							"Content-Type" : "application/json"
 						},
 						body : JSON.stringify({
-							index : this.dataset.index
+							date : this.dataset.date
 						})
-					});
+					}).then(response => {
+						window.location.href = "/page/portfolio";
+					})
 				}
 			});
 			document.body.prepend(deleteButton);
 
-			let editButton = $create(`<button data-index = "${projectIndex}">Edit</button>`);
+			let editButton = $create(`<button data-date = "${data[projectIndex].date}">Edit</button>`);
 			editButton.addEventListener("click", function() {
 				let editForm = $create(`
 					<form action = "/api/portfolio" method = "POST" enctype = "multipart/form-data" id = "form">
-						<input type = "hidden" value = "${this.dataset.index}" name = "index">
+						<input type = "hidden" value = "${this.dataset.date}" name = "date">
 						<input type = "file" name = "file">
 						<input type "text" name = "title" placeholder = "Title">
 						<input type "text" name = "link" placeholder = "Link">
