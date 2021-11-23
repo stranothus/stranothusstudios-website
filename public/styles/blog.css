@@ -95,9 +95,17 @@
 	letter-spacing : 0.3px;
 	color : var(--txt-main);
 }
+#blog-content .post .comment {
+	margin : 10px 5%;
+	padding : 10px 0;
+}
 #blog-content .post h2 {
 	font-family : var(--font-accent);
 	font-size : 1.75rem;
+}
+#blog-content .post .comment h2 {
+	font-family : var(--font-accent);
+	font-size : 1.25rem;
 }
 #blog-content .post h5 {
 	margin : 0 0 10px;
@@ -172,6 +180,12 @@
 	border-bottom : 2px solid var(--bg-tint-1);
 	background-color : transparent;
 	resize : vertical;
+}
+#blog-content .post #create-comment textarea {
+	margin : 15px 0;
+	padding : 10px 10px;
+	background-color : var(--bg-tint-1);
+	border-radius: 5px 5px 0 0;
 }
 #blog-content .post textarea:active,
 #blog-content .post textarea:focus {

@@ -14,4 +14,4 @@ function deletePost(date, callback) {
 	.catch(err => console.log(err));
 }
 
-export default deletePost
+export default deletePost;

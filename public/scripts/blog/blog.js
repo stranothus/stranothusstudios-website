@@ -2,8 +2,17 @@ import $create from "/scripts/create.js";
 import createPost from "./createPost.js";
 import editPost from "./editPost.js";
 import deletePost from "./deletePost.js";
+import createComment from "./createComment.js";
+import editComment from "./editComment.js";
+import deleteComment from "./deleteComment.js";
 
 const jumpTo = window.location.href.match(/#([\S]+)$/);
+const cookies = document.cookie.split('; ').reduce((prev, current) => {
+    const [name, ...value] = current.split('=');
+    prev[name] = value.join('=');
+    return prev;
+  }, {});
+const loggedIn = cookies.token;
 
 function setup() {
 	fetch("/api/blog", {
@@ -18,11 +27,11 @@ function setup() {
 		blogContent.innerHTML = "";
 
 		let topics = {};
-		let loggedIn = data.splice(data.length - 1, 1)[0];
+		let admin = data.splice(data.length - 1, 1)[0];
 		
 		data = data.reverse();
 
-		if(loggedIn) {
+		if(admin) {
 			let createPostElement = $create(`
 				<div id = "create-post">
 					<input type = "text" id = "title" placeholder = "Title...">
@@ -46,6 +55,13 @@ function setup() {
 			let index = data[i];
 
 			index["i"] = data.length - i - 1;
+			
+			let postElement = $create(`
+				<div class = "post" id = "post-${data.length - i - 1}">
+					<h2>${index.title}</h2>
+					<h5>${new Date(index.date).toLocaleDateString()}</h5>
+				</div>
+			`);
 
 			let markedContent = $create(`<div id = "post-content">${marked.marked(index.content)}</div>`);
 			let codes = markedContent.querySelectorAll("pre code");
@@ -56,18 +72,108 @@ function setup() {
     			});
 			}
 			
-			let postElement = $create(`
-				<div class = "post" id = "post-${data.length - i - 1}">
-					${loggedIn ? `
-					` : ``}
-					<h2>${index.title}</h2>
-					<h5>${new Date(index.date).toLocaleDateString()}</h5>
-				</div>
-			`);
-			
 			postElement.appendChild(markedContent);
-            
+
+			for(let e = 0; e < index.comments.length; e++) {
+				let endex = index.comments[e];
+
+				let comment = $create(`
+					<div class = "comment">
+						<h2>${endex.name}</h2>
+						<h5>${new Date(endex.date).toLocaleDateString()}</h5>
+					</div>
+				`);
+
+				let markedContent = $create(`<div id = "comment-content">${marked.marked(endex.content)}</div>`);
+				let codes = markedContent.querySelectorAll("pre code");
+				
+				if(codes) {
+					codes.forEach(el => {
+						hljs.highlightElement(el);
+					});
+				}
+				
+				comment.appendChild(markedContent);
+
+				if(endex.email || admin) {
+					let editButton = $create(`<button>Edit</button>`);
+                
+					editButton.dataset.index = JSON.stringify(index);
+					editButton.dataset.endex = JSON.stringify(endex);
+	
+					editButton.addEventListener("click", function() {
+						let i = JSON.parse(this.dataset.index);
+						let e = JSON.parse(this.dataset.endex);
+	
+						let editCommmentElement = $create(`
+							<div class = "edit-comment">
+								<input type = "hidden" name = "postDate" id = "postDate" value = "${i.date}">
+								<input type = "hidden" name = "commentDate" id = "commentDate" value = "${e.date}">
+								<textarea id = "content">${document.createTextNode(e.content).textContent}</textarea>
+							</div>
+						`);
+	
+						editCommmentElement.classList.add("post");
+	
+						let saveEditElement = $create(`<button>Save edit</button>`);
+	
+						saveEditElement.addEventListener("click", function() {
+							let p = this.parentElement;
+	
+							editComment({
+								"postDate" : p.querySelector("#postDate").value,
+								"commentDate" : p.querySelector("#commentDate").value,
+								"content" : p.querySelector("#content").value
+							}, setup);
+						});
+	
+						editCommmentElement.appendChild(saveEditElement);
+	
+						this.parentElement.replaceWith(editCommmentElement);
+					});
+	
+					comment.prepend(editButton);
+	
+	
+					let deleteButton = $create(`<button>Delete</button>`);
+	
+					deleteButton.dataset.postDate = index.date;
+					deleteButton.dataset.commentDate = endex.date;
+	
+					deleteButton.addEventListener("click", function() {
+						deleteComment({
+							"postDate": new Date(this.dataset.postDate),
+							"commentDate": new Date(this.dataset.commentDate)
+						}, setup);
+					});
+	
+					comment.prepend(deleteButton);
+				}
+	
+				postElement.appendChild(comment);
+			}
+
 			if(loggedIn) {
+				let createCommentElement = $create(`
+					<div id = "create-comment">
+						<textarea id = "content" placeholder = "Leave a reply..."></textarea>
+					</div>
+				`);
+
+				let button = $create("<button>Post</button>");
+
+				button.dataset.date = index.date;
+
+				button.addEventListener("click", function() {
+					createComment(this.parentElement.querySelector("#content").value, this.dataset.date, setup);
+				});
+
+				createCommentElement.appendChild(button);
+
+				postElement.appendChild(createCommentElement);
+			}
+            
+			if(admin) {
 				let editButton = $create(`<button>Edit</button>`);
                 
 				editButton.dataset.index = JSON.stringify(index);

@@ -45,7 +45,6 @@ app.use(uploadArray);
 app.use(cookies);
 app.use(loggedIn);
 app.use(route);
-// app.use(loggedIn);
 
 
 const transporter = nodemailer.createTransport({
@@ -68,7 +67,9 @@ var client = new Promise((resolve, reject) => {
 			resolve(client);
 		}
 	);
-}).then(c => { client = c; });
+}).then(c => {
+	client = c;
+});
 
 /**
  * Reads a database and returns the results of a query asynchronously
@@ -468,13 +469,31 @@ apiRouter.route("/portfolio")
 	});
 
 apiRouter.route("/blog")
-	.get( async (req, res) => {
+	.get(async (req, res) => {
 		//get the entire portfolio database
 		let results = await readDB("Content", "Blog", {});
 
 		results.push(req.loggedIn ? req.loggedIn.perms === "admin" : false);
 
-		res.json(results);
+		res.json(results.map(v => {
+			if(!v.comments) return v;
+
+			if(req.loggedIn) {
+				v.comments = v.comments.map(v => {
+					v.email = v.email === req.loggedIn.email;
+
+					return v;
+				});
+			} else {
+				v.comments = v.comments.map(v => {
+					v.email = false;
+
+					return v;
+				});
+			}
+
+			return v;
+		}));
 	})
 	.put((req, res) => {
 		//edit a blog post
@@ -536,6 +555,7 @@ apiRouter.route("/blog")
 				res.send("You ain't admin");
 				return;
 			}
+
 			client.db("Content").collection("Blog").deleteOne({ "date": new Date(body.date) }, (err, result) => {
 				if(err) console.error(err);
 
@@ -544,6 +564,99 @@ apiRouter.route("/blog")
 			});
 		} else {
 			log("FAIL", "Malformed blog post delete");
+			res.send("Failure ;-;");
+		}
+	});
+
+apiRouter.route("/comment/:date")
+	.get(async (req, res) => {
+		let params = req.params;
+		let date = params.date;
+
+		let results = (await readDB("Content", "Blog", { "date": new Date(date) })).comments;
+
+		results.push(req.loggedIn ? req.loggedIn.perms === "admin" : false);
+
+		res.json(results.map(v => {
+			if(!v.comments) return v;
+			v.email = req.loggedIn ? req.loggedIn.email === v.email : false;
+
+			return v;
+		}));
+	})
+	.put(async (req, res) => {
+		let body = req.body;
+		
+		if(req.loggedIn && body.content && body.postDate && body.commentDate) {
+			let comment = await readDB("Content", "Blog", { "date": new Date(body.postDate), "comments.date": new Date(body.commentDate) });
+
+			if(!comment) {
+				res.send("Failure ;-;");
+				return;
+			}
+			if(req.loggedIn.perms !== "admin" && comment.author !== req.loggedIn.email) {
+				res.send("Failure ;-;");
+				return;
+			}
+
+			client.db("Content").collection("Blog").updateOne({ "date": new Date(body.postDate), "comments.date": new Date(body.commentDate) }, { "$set": {
+				"comments.$.content": body.content
+			}}, (err, result) => {
+				if(err) console.error(err);
+
+				log("POST", `Blog post comment edited`);
+				res.send("Success!");
+			});
+		} else {
+			log("FAIL", "Malformed blog post comment edit");
+			res.send("Failure ;-;");
+		}
+	})
+	.post(async (req, res) => {
+		//create a new blog post comment
+		let body = req.body;
+
+		if(req.loggedIn && body.content && body.postDate) {
+			client.db("Content").collection("Blog").updateOne({ "date": new Date(body.postDate) }, { "$push": { "comments": {
+				"email": req.loggedIn.email,
+				"date": new Date(),
+				"content": body.content,
+				"name": req.loggedIn.name
+			}}}, (err, result) => {
+				if(err) console.error(err);
+
+				log("POST", `Blog post comment created`);
+				res.send("Success!");
+			});
+		} else {
+			log("FAIL", "Malformed blog post comment create");
+			res.send("Failure ;-;");
+		}
+	})
+	.delete(async (req, res) => {
+		//delete a blog post comment
+		let body = req.body;
+
+		if(req.loggedIn && body.postDate && body.commentDate) {
+			let comment = await readDB("Content", "Blog", { "date": new Date(body.postDate), "comments.date": new Date(body.commentDate) });
+
+			if(!comment) {
+				res.send("Failure ;-;");
+				return;
+			}
+			if(req.loggedIn.perms !== "admin" && comment.author !== req.loggedIn.email) {
+				res.send("Failure ;-;");
+				return;
+			}
+
+			client.db("Content").collection("Blog").updateOne({ "date": new Date(body.postDate) }, { "$pull": { "comments":  { "date": new Date(body.commentDate) }}}, (err, result) => {
+				if(err) console.error(err);
+
+				log("DELETE", `Blog post comment deleted`);
+				res.send("Success!");
+			});
+		} else {
+			log("FAIL", "Malformed blog post comment delete");
 			res.send("Failure ;-;");
 		}
 	});
