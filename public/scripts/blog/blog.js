@@ -231,7 +231,36 @@ function setup() {
 			}
 
 			blogContent.appendChild(postElement);
-			
+
+            let h5 = postElement.querySelector("h5");
+            let height = postElement.getBoundingClientRect().height;
+            let short = h5.getBoundingClientRect().top - postElement.getBoundingClientRect().top - 50;
+
+            postElement.style.height = short + "px";
+
+            let expandButton = $create(`<button data-expanded="false">More</button>`);
+
+            expandButton.addEventListener("click", function() {
+                let bool = this.dataset.expanded === "true";
+                let from = bool ? short : height;
+                let to = bool ? height : short;
+
+                postElement.animate([
+                    { height: to + "px" },
+                    { height: from + "px"}
+                ], {
+                    duration: 400,
+                    ease: "ease-out",
+                    fill: "forwards"
+                });
+
+                this.textContent = bool ? "More" : "Less";
+
+                this.dataset.expanded = !bool;
+            });
+
+            postElement.prepend(expandButton);
+            
 			let postContent = postElement.querySelector("#post-content");
 			let anchors = postContent.querySelectorAll("a");
 

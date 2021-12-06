@@ -94,6 +94,7 @@
 	line-height : 1.4;
 	letter-spacing : 0.3px;
 	color : var(--txt-main);
+    overflow-y : hidden;
 }
 #blog-content .post .comment {
 	margin : 10px 5%;

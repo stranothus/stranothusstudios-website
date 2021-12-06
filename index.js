@@ -707,8 +707,8 @@ apiRouter.get("/logout", (req, res) => {
 });
 
 
-app.listen("3030", err => {
+app.listen(process.env.PORT, err => {
 	if(err) throw err;
 	log("N/A", "Server restarted");
-	console.log("Listening");
+	console.log("Listening on PORT:" + process.env.PORT);
 });
