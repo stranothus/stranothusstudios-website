@@ -1,6 +1,7 @@
 import $create from "./create.js";
 
 const oldFooter = document.getElementById("footer");
+const page = window.location.href.replace(/^\S+\/page\/([^\/#?$]+)\S*$/, "$1");
 
 fetch("/api/footer")
 .then(response => response.text())
@@ -20,24 +21,26 @@ fetch("/api/footer")
 		links[i].style.width = largest + "px";
 	}
 	
-	let datas = await fetch("/api/portfolio").then(response => response.json());
-	datas = datas.reverse();
-	datas.splice(0, 1);
+    if(page !== "portfolio") {
+        let datas = await fetch("/api/portfolio").then(response => response.json());
+        datas.splice(-1, 1);
+        
+        for(let i = 0; i < datas.length; i++) {
+            allLinks.appendChild($create(`
+                <li><a href = "/page/project/${datas.length - i - 1}">${datas[i].title}</a></li>
+            `));
+        }
+    }
 	
-	for(let i = 0; i < datas.length; i++) {
-	    allLinks.appendChild($create(`
-	        <li><a href = "/page/project/${datas.length - i - 1}">${datas[i].title}</a></li>
-	    `));
-	}
-	
-	datas = await fetch("/api/blog").then(response => response.json());
-	datas = datas.reverse();
-	datas.splice(0, 1);
-	
-	for(let i = 0; i < datas.length; i++) {
-	    allLinks.appendChild($create(`
-	        <li><a href = "/page/blog#post-${i}">${datas[i].title}</a></li>
-	    `));
-	}
+    if(page !== "blog") {
+        let datas = await fetch("/api/blog").then(response => response.json());
+        datas.splice(-1, 1);
+        
+        for(let i = 0; i < datas.length; i++) {
+            allLinks.appendChild($create(`
+                <li><a href = "/page/blog#post-${i}">${datas[i].title}</a></li>
+            `));
+        }
+    }
 })
 .catch(err => console.log(err));
