@@ -6,7 +6,7 @@ import createComment from "./createComment.js";
 import editComment from "./editComment.js";
 import deleteComment from "./deleteComment.js";
 
-const jumpTo = window.location.href.match(/#([\S]+)$/);
+const jumpTo = window.location.href.match(/#\S+$/);
 const cookies = document.cookie.split('; ').reduce((prev, current) => {
     const [name, ...value] = current.split('=');
     prev[name] = value.join('=');
@@ -238,7 +238,7 @@ function setup() {
 
             postElement.style.height = short + "px";
 
-            let expandButton = $create(`<button data-expanded="false">More</button>`);
+            let expandButton = $create(`<button data-expanded="false" id = "expand">More</button>`);
 
             expandButton.addEventListener("click", function() {
                 let bool = this.dataset.expanded === "true";
@@ -260,6 +260,8 @@ function setup() {
             });
 
             postElement.prepend(expandButton);
+
+            if(jumpTo) if(data.length - jumpTo[0].match(/\d+/) - 1 == i) expandButton.click();
             
 			let postContent = postElement.querySelector("#post-content");
 			let anchors = postContent.querySelectorAll("a");
@@ -297,6 +299,10 @@ function setup() {
 					document.querySelector(this.getAttribute('href')).scrollIntoView({
 						behavior: 'smooth'
 					});
+
+                    let expand = document.querySelector(this.getAttribute('href')).querySelector("#expand");
+
+                    if(expand.dataset.expanded === "false") expand.click();
 				});
 
 				topics[index.topics[e]].appendChild(topic);
