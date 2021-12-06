@@ -27,6 +27,7 @@ header div:before {
 	height : 100%;
 	background-image : url("https://miro.medium.com/max/10884/1*5TRuG7tG0KrZJXKoFtHlSg.jpeg");
 	background-size : cover;
+    background-position: center;
 	filter : grayscale(100%) brightness(var(--header-brightness));
 }
 header div h1 {
