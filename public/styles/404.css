@@ -1,0 +1,8 @@
+nav {
+    z-index: 1000;
+    position: fixed;
+    top: 0;
+}
+header div:before {
+    background-image: url("https://starloggers.files.wordpress.com/2017/04/mind-trick.jpg");
+}

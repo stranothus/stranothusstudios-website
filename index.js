@@ -706,6 +706,18 @@ apiRouter.get("/logout", (req, res) => {
 	res.redirect("/page/home");
 });
 
+app.use((req, res) => {
+    let accepts = req.accepts("html") ? "html" : req.accepts("json") ? "json" : "text";
+
+    if(accepts === "html") {
+        res.sendFile(__dirname + "/public/views/404.html");
+    } else if(accepts === "json") {
+        res.json({ error: 'Not found' });
+    } else {
+        res.type('txt').send('Not found');
+    }
+});
+
 
 app.listen(process.env.PORT, err => {
 	if(err) throw err;
