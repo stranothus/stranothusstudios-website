@@ -21,7 +21,43 @@ const storage = multer.diskStorage({
 });
 
 const app = express();
-const body = express.json();
+const RateLimit = function(requests, time, message) {
+    this.requests = requests;
+    this.time = time;
+    this.message = message;
+    this.IPs = {};
+
+    this.limit = (req, res, next) => {
+        let IP = req.socket.remoteAddress;
+
+        if(this.IPs[IP]) {
+            this.IPs[IP].push(Date.now());
+        } else {
+            this.IPs[IP] = [
+                Date.now()
+            ];
+        }
+
+        this.IPs[IP] = this.IPs[IP].filter(v => v > (Date.now() - this.time));
+
+        if(this.IPs[IP].length > this.requests) {
+            let accepts = req.accepts("html") ? "html" : req.accepts("json") ? "json" : "text";
+
+            if(accepts === "html") {
+                res.status(429).type('txt').send(this.message);
+            } else if(accepts === "json") {
+                res.status(429).json({ error: this.message });
+            } else {
+                res.status(429).type('txt').send(this.message);
+            }
+
+            return;
+        }
+
+        next();
+    };
+};
+const body = express.json({ limit: '10kb' });
 const cookies = cookieParser();
 const upload = multer({ storage: storage });
 const uploadArray = upload.array("file");
@@ -38,7 +74,7 @@ const loggedIn = (req, res, next) => {
 	}
 
 	next();
-}
+};
 
 app.use(body);
 app.use(uploadArray);
@@ -230,7 +266,8 @@ apiRouter.get("/footer", (req, res) => {
 	res.sendFile(__dirname + "/public/resources/footer.html");
 });
 
-apiRouter.post("/sign-up", async (req, res) => {
+const signupLimit = new RateLimit(1, 1000 * 60 * 60 * 24, "You already have an account");
+apiRouter.post("/sign-up", signupLimit.limit, async (req, res) => {
     let body = req.body;
 
     if(body.email && body.name && body.password && body.confirmPassword) {
@@ -265,7 +302,7 @@ apiRouter.post("/sign-up", async (req, res) => {
 				created: new Date(),
 				confirmed: false,
 				perms: "user",
-				ip: req.socket.remoteAddress
+				ips: [ req.socket.remoteAddress ]
 			};
 
 			client.db("Visitors").collection("Accounts").insertOne(userObj, (err, result) => {
