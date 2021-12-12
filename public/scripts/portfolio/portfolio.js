@@ -20,7 +20,7 @@ function setup() {
 				</a>
 			`);
             
-			project.style.backgroundImage = `url(\'${data[i].image.replace(/^\S+\/public\//i, "/")}\')`;
+			project.style.backgroundImage = `url(\'${data[i].image.replace(/^\S+\/public\//i, "/").replace(/\/uploads/i, "\/uploads\/resized")}\')`;
 
 			portfolio.appendChild(project);
 		}

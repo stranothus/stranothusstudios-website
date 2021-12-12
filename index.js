@@ -6,6 +6,8 @@ const { MongoClient } = require("mongodb");
 const nodemailer = require("nodemailer");
 const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
+const sharp = require("sharp");
+const path = require("path");
 
 dotenv.config();
 
@@ -446,6 +448,16 @@ apiRouter.route("/portfolio")
 				res.send("You ain't admin");
 				return;
 			}
+
+            const { filename: image } = req.files[0];
+
+            await sharp(req.files[0].path)
+                .resize(200, 200)
+                .jpeg({ quality: 90 })
+                .toFile(
+                    path.resolve(req.files[0].destination, 'resized', image)
+                );
+            
 			let index = (await readDB("Content", "Portfolio", {})).length;
 			client.db("Content").collection("Portfolio").insertOne({
 				"image": req.files[0].path.replace(/^([a-zA-Z\/\-]+?)\/public/, ""),
