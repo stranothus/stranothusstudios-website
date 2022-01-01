@@ -28,7 +28,7 @@ form input:not([type=file]) {
 form input:not([type=file]):active,
 form input:not([type=file]):focus {
 	outline : none;
-	border-bottom : 2px solid var(--bg-accent-1);
+	border-bottom : 2px solid var(--bg-accent-2);
 }
 form input::placeholder {
 	color : var(--txt-main);
@@ -50,7 +50,7 @@ form textarea {
 form textarea:active,
 form textarea:focus {
 	outline : none;
-	border-bottom : 2px solid var(--bg-accent-1);
+	border-bottom : 2px solid var(--bg-accent-2);
 }
 form textarea::placeholder {
 	color : var(--txt-main);
@@ -97,7 +97,7 @@ form select {
 }
 form select:active,
 form select:focus {
-	border : 2px solid var(--bg-accent-1);
+	border : 2px solid var(--bg-accent-2);
 }
 form select option {
 	font-family : var(--font-accent);
