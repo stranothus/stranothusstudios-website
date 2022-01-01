@@ -102,6 +102,8 @@ var client = new Promise((resolve, reject) => {
 		(err, client) => {
 			if(err) console.error(err);
 
+            console.log("Connected to DB");
+
 			resolve(client);
 		}
 	);
