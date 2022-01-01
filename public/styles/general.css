@@ -1,14 +1,15 @@
-@import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Roboto:wght@500&family=Source+Sans+Pro&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Montserrat:wght@700&family=Roboto:wght@500&family=Source+Sans+Pro&display=swap');
 
 
 :root {
-	--bg-main : #303030;
-	--bg-tint-1 : #202020;
-	--bg-tint-2 : #404040;
-	--bg-accent-1 : #FAC000;
-	--bg-accent-2 : #FA00C0;
+	--bg-main : #202020;
+	--bg-tint-1 : #1A1A1A;
+	--bg-tint-2 : #303030;
+	--bg-accent-1 : #FA0030;
+	--bg-accent-2 : #FAC000;
 	--txt-main : #EFEFEF;
 	--txt-accent : #FAC000;
+    --font-big-title: 'Montserrat', sans-serif;
 	--font-title : 'Roboto', sans-serif;
 	--font-accent : 'Source Sans Pro', sans-serif;
 	--font-main : 'Lato', sans-serif;
