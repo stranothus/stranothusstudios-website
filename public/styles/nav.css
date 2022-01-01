@@ -9,7 +9,7 @@ nav {
 	overflow : hidden;
 	align-items : center;
 	justify-content : space-between;
-	background : var(--bg-accent-1);
+	background : linear-gradient(0.15turn, var(--bg-accent-1), var(--bg-accent-2));
 }
 nav img {
 	margin : -2px 0;
