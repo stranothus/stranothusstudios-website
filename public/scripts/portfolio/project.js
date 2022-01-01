@@ -47,7 +47,7 @@ function setup() {
 					})
 				}
 			});
-			document.body.prepend(deleteButton);
+			document.body.firstElementChild.nextElementSibling.before(deleteButton);
 
 			let editButton = $create(`<button data-date = "${data[projectIndex].date}">Edit</button>`);
 			editButton.addEventListener("click", function() {
@@ -72,7 +72,7 @@ function setup() {
 
 				document.body.prepend(editForm);
 			});
-			document.body.prepend(editButton);
+			document.body.firstElementChild.nextElementSibling.before(editButton);
 		}
 	})
 	.catch(err => console.log(err));

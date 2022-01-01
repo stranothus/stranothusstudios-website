@@ -92,6 +92,7 @@ button {
 	position : relative;
 	width : 10vw;
 	height : 0;
+    top: 50px;
 	z-index : 100;
 	float : right;
 	margin : 50px 25px 25px;
@@ -121,4 +122,8 @@ button:hover {
 	width : 40vw;
 	z-index : 1000;
 	box-shadow : 5px 5px 10px 5px #000000;
+}
+
+#sticky-nav {
+    box-shadow: 0 5px 5px #00000050;
 }
