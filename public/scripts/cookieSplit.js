@@ -1,0 +1,1 @@
+export default () => Object.assign({}, ...document.cookie.split("; ").map(v => ({ [v.split("=")[0]]: v.split("=")[1] })));
